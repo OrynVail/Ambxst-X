@@ -2,7 +2,7 @@
 
 var data = {
     "disks": ["/"],
-    "updateServiceEnabled": true,
+    "updateServiceEnabled": false,
     "idle": {
         "general": {
             "lock_cmd": "ambxst lock",
@@ -32,7 +32,7 @@ var data = {
     },
     "ocr": {
         "eng": true,
-        "spa": true,
+        "spa": false,
         "lat": false,
         "jpn": false,
         "chi_sim": false,
