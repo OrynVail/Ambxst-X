@@ -24,19 +24,6 @@ An <i><b>Ax</b>tremely</i> customizable shell.
 <div align="center">
   <img src="./assets/screenshots/1.png" width="100%" />
 
-  <br />
-
-  <img src="./assets/screenshots/2.png" width="32%" />
-  <img src="./assets/screenshots/3.png" width="32%" />
-  <img src="./assets/screenshots/4.png" width="32%" />
-
-  <img src="./assets/screenshots/5.png" width="32%" />
-  <img src="./assets/screenshots/6.png" width="32%" />
-  <img src="./assets/screenshots/7.png" width="32%" />
-
-  <img src="./assets/screenshots/8.png" width="32%" />
-  <img src="./assets/screenshots/9.png" width="32%" />
-  <img src="./assets/screenshots/10.png" width="32%" />
 </div>
 
 ---
@@ -100,8 +87,6 @@ It applies its own settings only when it runs, via IPC communication. This means
 - [x] Support for different layouts (dwindle, master, scrolling, etc.)
 - [x] Multi-monitor support
 - [x] Customizable keybindings
-- [ ] Plugin and extension system
-- [ ] Compatibility with other Wayland compositors
 
 ---
 
