@@ -26,7 +26,7 @@ Item {
     property real radius: Styling.radius(0)
     property real startRadius: radius
     property real endRadius: radius
-    
+
     property int baseSize: 36
     property int workspaceButtonSize: baseSize - widgetPadding * 2
     property int workspaceButtonWidth: workspaceButtonSize
@@ -157,7 +157,7 @@ Item {
         variant: "bg"
         anchors.fill: parent
         enableShadow: Config.showBackground && (!effectiveContainBar || Config.bar.keepBarShadow)
-        
+
         topLeftRadius: orientation === "vertical" ? workspacesWidget.startRadius : workspacesWidget.startRadius
         topRightRadius: orientation === "vertical" ? workspacesWidget.startRadius : workspacesWidget.endRadius
         bottomLeftRadius: orientation === "vertical" ? workspacesWidget.endRadius : workspacesWidget.startRadius

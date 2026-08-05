@@ -11,7 +11,6 @@ import qs.modules.bar.systray
 import qs.modules.widgets.overview
 import qs.modules.widgets.dashboard
 import qs.modules.widgets.powermenu
-import qs.modules.widgets.presets
 import qs.modules.corners
 import qs.modules.components
 import qs.modules.services
@@ -499,16 +498,9 @@ Item {
                             visible: !(root.orientation === "horizontal" && integratedDockEnabled)
                         }
 
-                        PresetsButton {
-                            id: presetsButton
-                            startRadius: root.dockAtEnd ? root.innerRadius : root.outerRadius
-                            endRadius: root.innerRadius
-                            enableShadow: root.shadowsEnabled
-                        }
-
                         ToolsButton {
                             id: toolsButton
-                            startRadius: root.innerRadius
+                            startRadius: root.dockAtEnd ? root.innerRadius : root.outerRadius
                             endRadius: root.innerRadius
                             enableShadow: root.shadowsEnabled
                         }
@@ -578,14 +570,6 @@ Item {
 
                         ToolsButton {
                             id: toolsButtonVert
-                            startRadius: root.innerRadius
-                            endRadius: root.innerRadius
-                            vertical: true
-                            enableShadow: root.shadowsEnabled
-                        }
-
-                        PresetsButton {
-                            id: presetsButtonVert
                             startRadius: root.innerRadius
                             endRadius: root.outerRadius
                             vertical: true

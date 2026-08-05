@@ -43,7 +43,6 @@ Ambxst is a highly customizable Wayland shell built with Quickshell. It provides
 │       ├── launcher/     # App search + multi-tab launcher
 │       ├── overview/     # Mission Control workspace overview
 │       ├── powermenu/    # Lock, logout, shutdown actions
-│       ├── presets/      # Theme/layout preset switcher
 │       └── tools/        # Quick utility access (OCR, recording, etc.)
 ├── assets/               # Wallpapers, color presets, AI provider configs, sounds
 ├── scripts/              # Python/Bash backends (system monitor, clipboard, OCR)
@@ -123,7 +122,7 @@ curl -L get.axeni.de/ambxst | sh
 
 ## NOTES
 - `Config.qml` is >3100 lines. Modify with care; use `pauseAutoSave` for bulk edits.
-- Large files (>1000 lines): `ClipboardTab`, `NotesTab`, `TmuxTab`, `BindsPanel`, `ShellPanel`, `PresetsTab`, `ThemePanel`, `LauncherView`, `AssistantTab`, `Ai.qml`.
+- Large files (>1000 lines): `ClipboardTab`, `NotesTab`, `TmuxTab`, `BindsPanel`, `ShellPanel`, `ThemePanel`, `LauncherView`, `AssistantTab`, `Ai.qml`.
 - The `qs.` import prefix is a Quickshell VFS construct, not a physical directory.
 - `screenshotToolMode` in `GlobalStates.qml` is **DEPRECATED**.
 - Gemini AI provider doesn't support the `system` role; handled in `services/ai/strategies/`.
