@@ -10,7 +10,6 @@ import qs.modules.bar.clock
 import qs.modules.bar.systray
 import qs.modules.widgets.overview
 import qs.modules.widgets.dashboard
-import qs.modules.widgets.powermenu
 import qs.modules.corners
 import qs.modules.components
 import qs.modules.services
@@ -533,14 +532,7 @@ Item {
                             bar: root
                             layerEnabled: root.shadowsEnabled
                             startRadius: root.innerRadius
-                            endRadius: root.innerRadius
-                        }
-
-                        PowerButton {
-                            id: powerButton
-                            startRadius: root.innerRadius
                             endRadius: root.outerRadius
-                            enableShadow: root.shadowsEnabled
                         }
                     }
                 }
@@ -732,16 +724,7 @@ Item {
                             bar: root
                             layerEnabled: root.shadowsEnabled
                             startRadius: root.innerRadius
-                            endRadius: root.innerRadius
-                        }
-
-                        PowerButton {
-                            id: powerButtonVert
-                            Layout.preferredHeight: 36
-                            startRadius: root.innerRadius
                             endRadius: root.outerRadius
-                            vertical: true
-                            enableShadow: root.shadowsEnabled
                         }
                     }
                 }

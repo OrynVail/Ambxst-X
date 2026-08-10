@@ -333,6 +333,47 @@ NotchAnimationBehavior {
 
                 onClicked: GlobalShortcuts.toggleSettings()
             }
+
+            // Power menu button (above controls)
+            StyledRect {
+                id: powerButtonContainer
+                anchors.bottom: controlsButtonContainer.top
+                anchors.bottomMargin: root.tabSpacing
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width
+                radius: Styling.radius(4)
+                variant: powerButton.hovered ? "focus" : "common"
+                z: -1
+            }
+
+            Button {
+                id: powerButton
+                anchors.bottom: controlsButtonContainer.top
+                anchors.bottomMargin: root.tabSpacing
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width
+                flat: true
+                hoverEnabled: true
+                z: 1
+
+                background: Rectangle {
+                    color: "transparent"
+                }
+
+                contentItem: Text {
+                    text: Icons.shutdown
+                    font.family: Icons.font
+                    font.pixelSize: 20
+                    font.weight: Font.Medium
+                    color: Colors.overBackground
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                onClicked: Visibilities.setActiveModule(Visibilities.currentActiveModule === "powermenu" ? "" : "powermenu")
+            }
         }
 
         Separator {
