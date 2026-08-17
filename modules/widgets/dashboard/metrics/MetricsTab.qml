@@ -178,68 +178,6 @@ Rectangle {
                     Layout.rightMargin: 16
                     spacing: 16
 
-                    // User avatar
-                    StyledRect {
-                        id: avatarContainer
-                        Layout.preferredWidth: 96
-                        Layout.preferredHeight: 96
-                        radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
-                        variant: "primary"
-
-                        Image {
-                            id: userAvatar
-                            anchors.fill: parent
-                            anchors.margins: 2
-                            source: `file://${Quickshell.env("HOME")}/.face.icon?${GlobalStates.avatarCacheBuster}`
-                            fillMode: Image.PreserveAspectCrop
-                            smooth: true
-                            asynchronous: true
-                            visible: status === Image.Ready
-
-                            layer.enabled: true
-                            layer.effect: MultiEffect {
-                                maskEnabled: true
-                                maskThresholdMin: 0.5
-                                maskSpreadAtMin: 1.0
-                                maskSource: ShaderEffectSource {
-                                    sourceItem: Rectangle {
-                                        width: userAvatar.width
-                                        height: userAvatar.height
-                                        radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
-                                    }
-                                }
-                            }
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: Icons.user
-                            font.family: Icons.font
-                            font.pixelSize: 48
-                            color: Colors.overSurfaceVariant
-                            visible: userAvatar.status !== Image.Ready
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
-                            onClicked: GlobalStates.pickUserAvatar()
-
-                            Rectangle {
-                                anchors.fill: parent
-                                color: Colors.overSurface
-                                opacity: parent.containsMouse ? 0.1 : 0
-                                radius: avatarContainer.radius
-
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: 150
-                                    }
-                                }
-                            }
-                        }
-                    }
 
                     // User info column
                     ColumnLayout {

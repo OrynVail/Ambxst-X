@@ -342,7 +342,7 @@ Singleton {
     // Shell config sections and their properties
     readonly property var _shellSections: {
         "frame": ["enabled", "thickness"],
-        "notch": ["theme", "position", "hoverRegionHeight", "keepHidden", "noMediaDisplay", "customText", "disableHoverExpansion", "alwaysVisible", "availableOnFullscreen", "reserveSpace", "use12hFormat", "enableFirefoxPlayer"],
+        "notch": ["theme", "position", "hoverRegionHeight", "keepHidden", "disableHoverExpansion", "alwaysVisible", "availableOnFullscreen", "reserveSpace", "logoIcon", "logoTint", "logoFullTint", "logoSize", "use12hFormat"],
         "workspaces": ["shown", "showAppIcons", "alwaysShowNumbers", "showNumbers", "dynamic"],
         "overview": ["enabled", "rows", "columns", "scale", "workspaceSpacing", "screenList"],
         "dock": ["enabled", "theme", "position", "height", "iconSize", "spacing", "margin", "hoverRegionHeight", "pinnedOnStartup", "hoverToReveal", "availableOnFullscreen", "showRunningIndicators", "showPinButton", "showOverviewButton", "screenList", "keepHidden"],

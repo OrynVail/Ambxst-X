@@ -9,6 +9,8 @@ import qs.modules.theme
 import qs.modules.components
 import qs.modules.globals
 import qs.modules.services
+import qs.modules.widgets.tools
+import qs.modules.bar.systray
 import qs.config
 import "calendar"
 
@@ -39,10 +41,24 @@ Rectangle {
                 Layout.preferredHeight: implicitHeight
             }
 
-            // Relocated off the bar: window layout, tools, system tray
-            ShellWidgets {
+            // Tools inline rather than a button that opens a notch module.
+            // 4 x 44 + 3 x 8 = 200, exactly the 216 column less its padding.
+            StyledRect {
+                variant: "pane"
+                radius: Styling.radius(4)
                 Layout.fillWidth: true
-                Layout.preferredHeight: implicitHeight
+                Layout.preferredHeight: toolsGrid.implicitHeight + 16
+
+                ToolsMenu {
+                    id: toolsGrid
+                    anchors.centerIn: parent
+                    layout: "grid"
+                    columns: 4
+                    showSeparators: false
+                    buttonSize: 44
+                    iconSize: 20
+                    spacing: 8
+                }
             }
 
             // Absorbs the slack so the blocks above hold their position
@@ -85,10 +101,31 @@ Rectangle {
                         Layout.preferredHeight: width
                     }
 
+                    // System tray, rehomed from the bar. Wider column than the
+                    // left, and it collapses when nothing is registered.
                     StyledRect {
+                        id: trayPane
                         variant: "pane"
+                        radius: Styling.radius(4)
+                        clip: true
+                        visible: tray.hasItems
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 150
+                        Layout.preferredHeight: visible ? tray.implicitHeight + 16 : 0
+
+                        // SysTray only reads bar.orientation
+                        QtObject {
+                            id: trayStub
+                            property string orientation: "horizontal"
+                            property string barPosition: "top"
+                        }
+
+                        SysTray {
+                            id: tray
+                            bar: trayStub
+                            anchors.centerIn: parent
+                            width: Math.min(implicitWidth, parent.width - 16)
+                            radius: Styling.radius(0)
+                        }
                     }
                 }
             }

@@ -5,12 +5,13 @@ var data = {
     "position": "top",
     "hoverRegionHeight": 8,
     "keepHidden": false,
-    "noMediaDisplay": "userHost",
-    "customText": "Ambxst",
     "disableHoverExpansion": true,
     "alwaysVisible": false,
     "availableOnFullscreen": false,
     "reserveSpace": true,
-    "use12hFormat": false,
-    "enableFirefoxPlayer": false
+    "logoIcon": "",
+    "logoTint": true,
+    "logoFullTint": true,
+    "logoSize": 28,
+    "use12hFormat": false
 }

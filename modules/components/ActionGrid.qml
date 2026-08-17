@@ -100,7 +100,8 @@ FocusScope {
             variant: (repeater.count > 0 && repeater.itemAt(root.currentIndex) && repeater.itemAt(root.currentIndex).actionModel.variant) ? repeater.itemAt(root.currentIndex).actionModel.variant : "primary"
             radius: Styling.radius(4)
             z: 0 // Por debajo de los botones
-            visible: repeater.count > 0
+            // Keyboard-navigation cursor only — per-button states carry the look
+            visible: root.activeFocus && repeater.count > 0
 
             property Item targetItem: repeater.count > 0 ? repeater.itemAt(root.currentIndex) : null
 
@@ -249,9 +250,19 @@ FocusScope {
                             }
                         }
 
-                        background: Rectangle {
-                            color: "transparent"
+                        background: StyledRect {
+                            id: actionBg
                             radius: Styling.radius(4)
+                            variant: {
+                                const declared = delegateWrapper.actionModel ? delegateWrapper.actionModel.variant : "";
+                                if (declared)
+                                    return declared;
+                                if (actionButton.pressed)
+                                    return "primary";
+                                if (actionButton.hovered)
+                                    return "focus";
+                                return "internalbg";
+                            }
                         }
 
                         contentItem: Item {
@@ -266,7 +277,7 @@ FocusScope {
                                 textFormat: Text.RichText
                                 font.family: Icons.font
                                 font.pixelSize: root.iconSize
-                                color: actionButton.pressed ? Styling.srItem("overprimary") : (index === root.currentIndex ? (highlight.targetItem ? highlight.item : Styling.srItem("primary")) : Colors.overBackground)
+                                color: actionBg.item
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
 
@@ -290,7 +301,7 @@ FocusScope {
                                 font.family: Config.defaultFont
                                 font.pixelSize: root.iconSize * 0.7
                                 font.weight: Font.DemiBold
-                                color: actionButton.pressed ? Styling.srItem("overprimary") : (index === root.currentIndex ? (highlight.targetItem ? highlight.item : Styling.srItem("primary")) : Colors.overBackground)
+                                color: actionBg.item
                                 verticalAlignment: Text.AlignVCenter
 
                                 Behavior on color {

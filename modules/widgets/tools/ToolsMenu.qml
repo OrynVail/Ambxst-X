@@ -15,7 +15,7 @@ ActionGrid {
     QtObject {
         id: recordAction
         property string icon: ScreenRecorder.isRecording ? Icons.stop : Icons.recordScreen
-        property string text: ScreenRecorder.isRecording ? ScreenRecorder.duration : ""
+        property string text: ""
         property string tooltip: ScreenRecorder.isRecording ? "Stop Recording" : "Screen Recorder"
         property string command: ""
         property string variant: ScreenRecorder.isRecording ? "error" : "primary"
@@ -27,29 +27,34 @@ ActionGrid {
     iconSize: 20
     spacing: 8
 
-    actions: [
-        {
-            icon: Icons.camera,
-            tooltip: "Screenshot",
-            command: ""
-        },
+    // Separators group nicely in a single row, but in grid layout they land
+    // mid-grid as 2px slivers in a full cell — so callers can drop them.
+    property bool showSeparators: true
+
+    readonly property var captureGroup: [
         {
             icon: Icons.screenshots,
             tooltip: "Open Screenshots",
             command: ""
-        },
-        {
-            type: "separator"
-        },
+        }
+    ]
+
+    readonly property var recordGroup: ScreenRecorder.isRecording ? [
         recordAction,
         {
             icon: Icons.recordings,
             tooltip: "Open Recordings",
             command: ""
-        },
+        }
+    ] : [
         {
-            type: "separator"
-        },
+            icon: Icons.recordings,
+            tooltip: "Open Recordings",
+            command: ""
+        }
+    ]
+
+    readonly property var utilityGroup: [
         {
             icon: Icons.picker,
             tooltip: "Color Picker",
@@ -77,6 +82,16 @@ ActionGrid {
         }
     ]
 
+    actions: showSeparators ? captureGroup.concat([
+        {
+            type: "separator"
+        }
+    ], recordGroup, [
+        {
+            type: "separator"
+        }
+    ], utilityGroup) : captureGroup.concat(recordGroup, utilityGroup)
+
     Process {
         id: colorPickerProc
     }
@@ -98,15 +113,7 @@ ActionGrid {
     onActionTriggered: action => {
         console.log("Tools action triggered:", action.tooltip);
 
-        if (action.tooltip === "Screenshot") {
-            Screenshot.initialize();
-            GlobalStates.screenshotToolVisible = true;
-            root.itemSelected();
-        } else if (action.tooltip === "Screen Recorder") {
-            ScreenRecorder.initialize();
-            GlobalStates.screenRecordToolVisible = true;
-            root.itemSelected();
-        } else if (action.tooltip === "Stop Recording") {
+        if (action.tooltip === "Stop Recording") {
             ScreenRecorder.toggleRecording();
             root.itemSelected();
         } else if (action.tooltip === "Open Screenshots") {

@@ -39,12 +39,5 @@ function validate(current, defaults, keyName) {
         }
     }
 
-    if (keyName === "noMediaDisplay") {
-        var validMediaOptions = ["userHost", "compositor", "custom"];
-        if (validMediaOptions.indexOf(current) === -1) {
-            return defaults;
-        }
-    }
-
     return current;
 }

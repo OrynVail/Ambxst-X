@@ -47,7 +47,7 @@ Item {
 
     // Resting height of the notch. Also what gets reserved as exclusive zone,
     // so expanding the notch overlaps windows instead of displacing them.
-    readonly property int idleHeight: 36
+    readonly property int idleHeight: Config.showBackground ? 44 : 40
 
     // Idle height follows the content; the 44 floor only applies once a module
     // or notification has expanded the stack

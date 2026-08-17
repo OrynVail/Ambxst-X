@@ -654,14 +654,15 @@ Singleton {
             property string position: "top"
             property int hoverRegionHeight: 8
             property bool keepHidden: false
-            property string noMediaDisplay: "userHost"
-            property string customText: "Ambxst"
             property bool disableHoverExpansion: true
             property bool alwaysVisible: false
             property bool availableOnFullscreen: false
             property bool reserveSpace: true
+            property string logoIcon: ""
+            property bool logoTint: true
+            property bool logoFullTint: true
+            property int logoSize: 28
             property bool use12hFormat: false
-            property bool enableFirefoxPlayer: false
         }
     }
 

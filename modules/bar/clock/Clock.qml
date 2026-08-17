@@ -75,7 +75,7 @@ Item {
         bottomLeftRadius: root.vertical ? root.endRadius : root.startRadius
         bottomRightRadius: root.vertical ? root.endRadius : root.endRadius
 
-        implicitWidth: vertical ? 36 : rowLayout.implicitWidth + 24
+        implicitWidth: vertical ? 36 : rowLayout.implicitWidth + 16
         implicitHeight: vertical ? columnLayout.implicitHeight + 24 : 36
 
         Rectangle {

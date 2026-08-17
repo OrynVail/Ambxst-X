@@ -147,7 +147,6 @@ QtObject {
         { label: "Ambxst", keywords: "about info credits version shell", section: 8, subSection: "", subLabel: "", icon: Qt.resolvedUrl("../../../../assets/ambxst/ambxst-icon.svg"), isIcon: false },
         
         // Ambxst > Bar
-        { label: "Firefox Player", keywords: "browser media music", section: 8, subSection: "notch", subLabel: "Ambxst > Notch", icon: Icons.layout, isIcon: true },
         
         // Ambxst > Notch
         { label: "Notch", keywords: "island dynamic island center", section: 8, subSection: "notch", subLabel: "Ambxst > Notch", icon: Icons.layout, isIcon: true },

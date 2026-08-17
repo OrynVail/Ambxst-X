@@ -22,6 +22,11 @@ GIF_EXTENSIONS = {".gif"}
 # Default thumbnail size
 THUMBNAIL_SIZE = "140x140"
 
+# Records which source file each thumbnail was built from. Thumbnails are named
+# after the source's basename, so without this a renamed file can inherit a
+# stale thumbnail left behind by a deleted one of the same name.
+MANIFEST_NAME = ".manifest.json"
+
 
 class ThumbnailGenerator:
     def __init__(
@@ -39,6 +44,7 @@ class ThumbnailGenerator:
         self.total_files = 0
         self.processed_count = 0
         self.lock = threading.Lock()
+        self.manifest = {}
 
     def load_config(self) -> bool:
         """Load wallpaper configuration."""
@@ -132,21 +138,100 @@ class ThumbnailGenerator:
 
         return thumbnail_path
 
+    # --- manifest -----------------------------------------------------------
+
+    def manifest_file(self) -> Path:
+        return self.thumbnails_dir / MANIFEST_NAME
+
+    def load_manifest(self) -> None:
+        try:
+            with open(self.manifest_file(), "r") as f:
+                data = json.load(f)
+            self.manifest = data if isinstance(data, dict) else {}
+        except Exception:
+            self.manifest = {}
+
+    def save_manifest(self) -> None:
+        try:
+            target = self.manifest_file()
+            tmp = target.with_name(target.name + ".tmp")
+            with open(tmp, "w") as f:
+                json.dump(self.manifest, f)
+            tmp.replace(target)
+        except Exception as e:
+            print(f"WARNING: could not write thumbnail manifest: {e}")
+
+    def thumb_key(self, thumbnail_path: Path) -> str:
+        return str(thumbnail_path.relative_to(self.thumbnails_dir))
+
+    def source_stamp(self, file_path: Path) -> Optional[dict]:
+        try:
+            st = file_path.stat()
+        except OSError:
+            return None
+        return {"src": str(file_path), "mtime": st.st_mtime, "size": st.st_size}
+
+    def prune_orphans(self, files: List[Path]) -> int:
+        """Delete thumbnails whose source file no longer exists.
+
+        Without this, deleted wallpapers leave thumbnails behind that a later
+        file of the same name will silently inherit.
+        """
+        valid = {self.thumb_key(self.get_thumbnail_path(f)) for f in files}
+        removed = 0
+
+        for thumb in sorted(self.thumbnails_dir.rglob("*"), reverse=True):
+            if thumb.is_dir():
+                try:
+                    thumb.rmdir()  # only succeeds when empty
+                except OSError:
+                    pass
+                continue
+            if thumb.name == MANIFEST_NAME or thumb.name.startswith(MANIFEST_NAME):
+                continue
+            key = self.thumb_key(thumb)
+            if key not in valid:
+                try:
+                    thumb.unlink()
+                    self.manifest.pop(key, None)
+                    removed += 1
+                except OSError:
+                    pass
+
+        # Drop manifest rows whose thumbnail is gone
+        for key in [k for k in self.manifest if not (self.thumbnails_dir / k).exists()]:
+            self.manifest.pop(key, None)
+
+        if removed:
+            print(f"🧹 Pruned {removed} orphaned thumbnail(s)")
+        return removed
+
     def needs_thumbnail(self, file_path: Path) -> bool:
-        """Check if file needs thumbnail generation."""
+        """Check if file needs thumbnail generation.
+
+        Regenerates unless the manifest confirms this exact source path, mtime
+        and size produced the thumbnail. mtime alone is not enough: renaming a
+        file leaves its mtime untouched, so a stale thumbnail can look current.
+        """
         thumbnail_path = self.get_thumbnail_path(file_path)
 
-        # If thumbnail doesn't exist, needs generation
         if not thumbnail_path.exists():
             return True
 
-        # If file is newer than thumbnail, needs regeneration
-        try:
-            file_mtime = file_path.stat().st_mtime
-            thumbnail_mtime = thumbnail_path.stat().st_mtime
-            return file_mtime > thumbnail_mtime
-        except:
+        record = self.manifest.get(self.thumb_key(thumbnail_path))
+        if not record:
+            # Unknown provenance (pre-manifest cache) — rebuild once to be sure
             return True
+
+        stamp = self.source_stamp(file_path)
+        if stamp is None:
+            return True
+
+        return (
+            record.get("src") != stamp["src"]
+            or record.get("mtime") != stamp["mtime"]
+            or record.get("size") != stamp["size"]
+        )
 
     def generate_video_thumbnail(self, video_path: Path) -> Tuple[bool, str]:
         """Generate thumbnail for a video file using FFmpeg."""
@@ -295,6 +380,10 @@ class ThumbnailGenerator:
 
             # Update progress
             with self.lock:
+                if success:
+                    stamp = self.source_stamp(file_path)
+                    if stamp:
+                        self.manifest[self.thumb_key(self.get_thumbnail_path(file_path))] = stamp
                 self.processed_count += 1
                 progress = (self.processed_count / self.total_files) * 100
                 status = "✓" if success else "✗"
@@ -360,11 +449,19 @@ class ThumbnailGenerator:
         if not self.load_config():
             return 1
 
+        self.load_manifest()
+
         # Find all files
         files = self.find_files()
         if not files:
             print("ℹ️  No media files found")
+            self.prune_orphans(files)
+            self.save_manifest()
             return 0
+
+        # Drop thumbnails for wallpapers that no longer exist, before deciding
+        # what to build — otherwise a stale one can be mistaken for current
+        self.prune_orphans(files)
 
         # Filter files that need thumbnails
         for file_path in files:
@@ -375,6 +472,7 @@ class ThumbnailGenerator:
 
         if self.total_files == 0:
             print("✓ All thumbnails are up to date")
+            self.save_manifest()
             return 0
 
         print(f"📋 {self.total_files} files need thumbnail generation")
@@ -393,6 +491,8 @@ class ThumbnailGenerator:
         except Exception as e:
             print(f"❌ Unexpected error: {e}")
             return 1
+        finally:
+            self.save_manifest()
 
 
 def main():

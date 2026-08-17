@@ -6,19 +6,23 @@ import qs.modules.theme
 import qs.config
 
 // Workspace indicator for the notch idle row.
-// Only occupied workspaces (plus the active one) take up space. Slots are never
-// created or destroyed — empty ones collapse to zero width so the row animates
-// instead of popping items in and out.
+//
+// Shows the contiguous span between the lowest and highest workspace in use, so
+// skipped workspaces stay visible as gaps rather than collapsing and making
+// distant workspaces look adjacent. Three tiers: active is a pill, in-use is a
+// filled circle, skipped-but-within-span is a faint circle.
+//
+// Only width animates — height and radius are constant — which keeps the motion
+// smooth instead of several springy properties fighting each other.
 Item {
     id: root
 
     required property var screen
 
     readonly property int slotCount: Math.max(1, Config.workspaces.shown)
-    readonly property int dotWidth: 5
-    readonly property int capsuleWidth: 20
-    readonly property int gap: 5
-    readonly property int rowHeight: 10
+    readonly property int dotSize: 10
+    readonly property int capsuleWidth: 24
+    readonly property int gap: 6
 
     readonly property var monitor: AxctlService.monitorFor(screen)
     readonly property int activeId: monitor?.activeWorkspace?.id ?? 1
@@ -28,9 +32,30 @@ Item {
         return root.group * root.slotCount + index + 1;
     }
 
+    // Span of workspaces worth showing: everything between the lowest and
+    // highest that is either occupied or currently active
+    readonly property int spanLo: {
+        let lo = root.activeId;
+        for (let i = 0; i < root.slotCount; i++) {
+            const id = root.workspaceId(i);
+            if (CompositorData.workspaceOccupationMap[id] && id < lo)
+                lo = id;
+        }
+        return lo;
+    }
+    readonly property int spanHi: {
+        let hi = root.activeId;
+        for (let i = 0; i < root.slotCount; i++) {
+            const id = root.workspaceId(i);
+            if (CompositorData.workspaceOccupationMap[id] && id > hi)
+                hi = id;
+        }
+        return hi;
+    }
+
     // Trailing gap trimmed so the row stays optically centred
     implicitWidth: Math.max(0, slotRow.implicitWidth - gap)
-    implicitHeight: rowHeight
+    implicitHeight: dotSize
 
     WheelHandler {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -58,20 +83,19 @@ Item {
                 readonly property int wsId: root.workspaceId(index)
                 readonly property bool isActive: wsId === root.activeId
                 readonly property bool isOccupied: CompositorData.workspaceOccupationMap[wsId] ?? false
-                readonly property bool shown: isActive || isOccupied
+                readonly property bool shown: wsId >= root.spanLo && wsId <= root.spanHi
 
-                readonly property int bodyWidth: isActive ? root.capsuleWidth : root.dotWidth
+                readonly property int bodyWidth: isActive ? root.capsuleWidth : root.dotSize
 
                 width: shown ? bodyWidth + root.gap : 0
-                height: root.rowHeight
+                height: root.dotSize
                 opacity: shown ? 1 : 0
 
                 Behavior on width {
                     enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 1.1
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -83,52 +107,38 @@ Item {
                     }
                 }
 
-                Item {
+                Rectangle {
                     id: body
                     width: slot.bodyWidth
-                    height: root.rowHeight
-                    // Centred within the slot, ignoring the trailing gap
-                    x: (slot.width - root.gap - width) / 2
-                    clip: true
+                    height: root.dotSize
+                    radius: height / 2
+                    color: Colors.overBackground
 
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: parent.width
-                        height: slot.isActive ? root.rowHeight : root.dotWidth
-                        radius: height / 2
-                        // State is carried by shape alone — the accent is reserved
-                        // for interaction (hover / open popup) elsewhere in the row
-                        color: Colors.overBackground
-                        opacity: slot.isActive ? 0.85 : 0.35
+                    // active pill > in use > skipped over
+                    opacity: slot.isActive ? 0.85 : (slot.isOccupied ? 0.55 : 0.2)
 
-                        Behavior on height {
-                            enabled: Config.animDuration > 0
-                            NumberAnimation {
-                                duration: Config.animDuration
-                                easing.type: Easing.OutBack
-                                easing.overshoot: 1.1
-                            }
-                        }
-                        Behavior on color {
-                            enabled: Config.animDuration > 0
-                            ColorAnimation {
-                                duration: Config.animDuration / 2
-                            }
-                        }
-                        Behavior on opacity {
-                            enabled: Config.animDuration > 0
-                            NumberAnimation {
-                                duration: Config.animDuration / 2
-                            }
+                    Behavior on width {
+                        enabled: Config.animDuration > 0
+                        NumberAnimation {
+                            duration: Config.animDuration
+                            easing.type: Easing.OutCubic
                         }
                     }
 
+                    Behavior on opacity {
+                        enabled: Config.animDuration > 0
+                        NumberAnimation {
+                            duration: Config.animDuration / 2
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
 
+                // Taller than the pill so it is comfortable to hit
                 MouseArea {
-                    width: body.width
-                    height: parent.height
-                    x: body.x
+                    width: slot.bodyWidth
+                    height: 24
+                    anchors.verticalCenter: body.verticalCenter
                     enabled: slot.shown
                     cursorShape: Qt.PointingHandCursor
                     onPressed: AxctlService.dispatch(`workspace ${slot.wsId}`)

@@ -798,6 +798,54 @@ Item {
                             }
                         }
 
+                        TextInputRow {
+                            label: "Logo"
+                            value: Config.notch.logoIcon ?? ""
+                            placeholder: "Symbol or path to icon..."
+                            onValueEdited: newValue => {
+                                if (newValue !== Config.notch.logoIcon) {
+                                    GlobalStates.markShellChanged();
+                                    Config.notch.logoIcon = newValue;
+                                }
+                            }
+                        }
+
+                        ToggleRow {
+                            label: "Logo Tint"
+                            checked: Config.notch.logoTint ?? true
+                            onToggled: value => {
+                                if (value !== Config.notch.logoTint) {
+                                    GlobalStates.markShellChanged();
+                                    Config.notch.logoTint = value;
+                                }
+                            }
+                        }
+
+                        ToggleRow {
+                            label: "Logo Full Tint"
+                            checked: Config.notch.logoFullTint ?? true
+                            onToggled: value => {
+                                if (value !== Config.notch.logoFullTint) {
+                                    GlobalStates.markShellChanged();
+                                    Config.notch.logoFullTint = value;
+                                }
+                            }
+                        }
+
+                        NumberInputRow {
+                            label: "Logo Size"
+                            value: Config.notch.logoSize ?? 28
+                            minValue: 12
+                            maxValue: 64
+                            suffix: "px"
+                            onValueEdited: newValue => {
+                                if (newValue !== Config.notch.logoSize) {
+                                    GlobalStates.markShellChanged();
+                                    Config.notch.logoSize = newValue;
+                                }
+                            }
+                        }
+
                         ToggleRow {
                             label: "Reserve Space"
                             checked: Config.notch.reserveSpace ?? true
@@ -816,17 +864,6 @@ Item {
                                 if (value !== Config.notch.use12hFormat) {
                                     GlobalStates.markShellChanged();
                                     Config.notch.use12hFormat = value;
-                                }
-                            }
-                        }
-
-                        ToggleRow {
-                            label: "Firefox Media Player"
-                            checked: Config.notch.enableFirefoxPlayer ?? false
-                            onToggled: value => {
-                                if (value !== Config.notch.enableFirefoxPlayer) {
-                                    GlobalStates.markShellChanged();
-                                    Config.notch.enableFirefoxPlayer = value;
                                 }
                             }
                         }
@@ -864,59 +901,6 @@ Item {
                             }
                         }
 
-                        Separator {
-                            Layout.fillWidth: true
-                        }
-
-                        Text {
-                            text: "No Media Display"
-                            font.family: Config.theme.font
-                            font.pixelSize: Styling.fontSize(-1)
-                            font.weight: Font.Medium
-                            color: Colors.overSurfaceVariant
-                            Layout.bottomMargin: -4
-                        }
-
-                        SelectorRow {
-                            label: ""
-                            options: [
-                                {
-                                    label: "User@Host",
-                                    value: "userHost",
-                                    icon: Icons.user
-                                },
-                                {
-                                    label: "Compositor",
-                                    value: "compositor",
-                                    icon: Icons.compositor
-                                },
-                                {
-                                    label: "Custom",
-                                    value: "custom",
-                                    icon: Icons.textT
-                                }
-                            ]
-                            value: Config.notch.noMediaDisplay ?? "userHost"
-                            onValueSelected: newValue => {
-                                if (newValue !== Config.notch.noMediaDisplay) {
-                                    GlobalStates.markShellChanged();
-                                    Config.notch.noMediaDisplay = newValue;
-                                }
-                            }
-                        }
-
-                        TextInputRow {
-                            label: "Custom Text"
-                            visible: Config.notch.noMediaDisplay === "custom"
-                            value: Config.notch.customText ?? "Ambxst"
-                            placeholder: "Enter text..."
-                            onValueEdited: newValue => {
-                                if (newValue !== Config.notch.customText) {
-                                    GlobalStates.markShellChanged();
-                                    Config.notch.customText = newValue;
-                                }
-                            }
-                        }
                     }
 
                     Separator {

@@ -58,15 +58,23 @@ Item {
         return toplevel.fullscreen === true;
     }
 
-    // The notch is the only panel now, so it answers to nothing but its own config:
-    // alwaysVisible pins it open, keepHidden makes it interaction-only, fullscreen
-    // hides it unless availableOnFullscreen.
+    // Windows on this monitor's active workspace — keepHidden only tucks the notch
+    // away when there is actually something for it to get out of the way of
+    readonly property var compositorMonitor: AxctlService.monitorFor(screen)
+    readonly property var toplevels: (!compositorMonitor || !compositorMonitor.activeWorkspace || !AxctlService.clients.values) ? [] : AxctlService.clients.values.filter(c => c.workspace.id === compositorMonitor.activeWorkspace.id)
+    readonly property bool hasWindows: toplevels.length > 0
+
+    // The notch is the only panel now, so it answers to nothing but its own config.
     readonly property bool shouldAutoHide: {
         if (alwaysVisible || Visibilities.notchPopupOpen)
             return false;
-        if (keepHidden)
+        if (activeWindowFullscreen)
             return true;
-        return activeWindowFullscreen;
+        // Like the dock: hidden while windows are present, on show when the
+        // workspace is empty
+        if (keepHidden)
+            return hasWindows;
+        return false;
     }
 
     // Notch state properties
@@ -81,26 +89,20 @@ Item {
 
     // Reveal logic:
     readonly property bool reveal: {
-        // keepHidden: show only on interaction
-        if (keepHidden) {
-            return (screenNotchOpen || hasActiveNotifications || hoverActive || Visibilities.notchPopupOpen);
+        const interacting = screenNotchOpen || hasActiveNotifications || hoverActive || Visibilities.notchPopupOpen;
+
+        // Fullscreen is evaluated first, so availableOnFullscreen actually governs
+        // it — previously the keepHidden branch returned before this was reached.
+        if (activeWindowFullscreen) {
+            if (!availableOnFullscreen)
+                return false;
+            return alwaysVisible || interacting;
         }
 
-        // Fullscreen hides the notch unless explicitly allowed
-        if (activeWindowFullscreen && !availableOnFullscreen) {
-            return false;
-        }
-
-        // If not auto-hiding (pinned and not fullscreen), always show
-        if (!shouldAutoHide) return true;
-
-        // Show on interaction (hover, open, notifications)
-        // This works even in fullscreen, ensuring hover always works
-        if (screenNotchOpen || hasActiveNotifications || hoverActive) {
+        if (!shouldAutoHide)
             return true;
-        }
 
-        return false;
+        return interacting;
     }
 
     // Timer to delay hiding the notch after mouse leaves

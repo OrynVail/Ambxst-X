@@ -20,8 +20,8 @@ StyledRect {
     visible: true
     radius: playerRadius
 
-    // Content-driven: the card is only as tall as title + seek + controls + duration
-    implicitHeight: content.implicitHeight + 32
+    // Content-driven, with room to breathe now that the profile row is gone
+    implicitHeight: content.implicitHeight + 56
 
     readonly property bool isDragging: seekBar.isDragging
 

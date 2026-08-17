@@ -60,21 +60,10 @@ Item {
         }
     }
 
-    // Clear space either side of the avatar, so it reads as surrounded rather
-    // than as one more item in a list
-    readonly property int moat: 16
-
-    // Both flanks reserve the same width, which is what pins the avatar to the
-    // notch's true centre — it cannot drift as workspaces come and go. The
-    // lighter flank's spare room is invisible inside a solid notch.
-    readonly property real flankWidth: Math.max(leftFlank.implicitWidth, rightFlank.implicitWidth)
-    readonly property real rowContentWidth: userInfo.implicitWidth + moat * 2 + flankWidth * 2
-
-    // Computed dimensions — width now follows the row's real content
-    readonly property real mainRowContentWidth: rowContentWidth + mainRowMargin * 2
-    // Sized to the tallest element (28px avatar, ~30px hover-scaled) rather than
-    // the 36px bar buttons this row used to hold
-    readonly property real mainRowHeight: 36
+    // Width follows the row's real content, so the notch contracts as
+    // workspaces collapse instead of holding a reserved width open
+    readonly property real mainRowContentWidth: mainRow.implicitWidth + mainRowMargin * 2
+    readonly property real mainRowHeight: Config.showBackground ? (Config.notchTheme === "island" ? 36 : 44) : (Config.notchTheme === "island" ? 36 : 40)
     readonly property real notificationMinWidth: expandedState ? 420 : 320
     readonly property real notificationContainerHeight: notificationView.implicitHeight + notificationPaddingTop + notificationPaddingBottom
 
@@ -94,65 +83,45 @@ Item {
     Item {
         anchors.fill: parent
 
-        // mainRow container: left flank | avatar | right flank.
-        // state on the left, you in the middle, actions on the right.
-        Item {
+        // mainRow: logo leads, then state, then battery. A plain row so the
+        // notch hugs its contents.
+        RowLayout {
             id: mainRow
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: root.isBottom ? undefined : parent.top
             anchors.bottom: root.isBottom ? parent.bottom : undefined
-            width: root.rowContentWidth
             height: root.mainRowHeight
+            spacing: 8
             z: 2 // Stay above notifications if they ever overlap
 
-            UserInfo {
-                id: userInfo
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
+            NotchLogo {
+                id: notchLogo
+                // Logo button has only 4px of internal padding, so it needs an
+                // explicit margin to match the other optical gaps
+                Layout.rightMargin: 4
+                Layout.alignment: Qt.AlignVCenter
             }
 
-            RowLayout {
-                id: leftFlank
-                anchors.right: userInfo.left
-                anchors.rightMargin: root.moat
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 8
-
-                NotchWorkspaces {
-                    id: workspaces
-                    screen: root.screen
-                    Layout.alignment: Qt.AlignVCenter
-                }
-
-                Clock {
-                    id: clockWidget
-                    bar: notchBarStub
-                    flat: true
-                    layerEnabled: false
-                    Layout.alignment: Qt.AlignVCenter
-                }
+            NotchWorkspaces {
+                id: workspaces
+                screen: root.screen
+                Layout.alignment: Qt.AlignVCenter
             }
 
-            RowLayout {
-                id: rightFlank
-                anchors.left: userInfo.right
-                anchors.leftMargin: root.moat
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 8
+            Clock {
+                id: clockWidget
+                bar: notchBarStub
+                flat: true
+                layerEnabled: false
+                Layout.alignment: Qt.AlignVCenter
+            }
 
-                ToolsButton {
-                    flat: true
-                    enableShadow: false
-                    Layout.alignment: Qt.AlignVCenter
-                }
-
-                BatteryIndicator {
-                    id: batteryWidget
-                    bar: notchBarStub
-                    flat: true
-                    layerEnabled: false
-                    Layout.alignment: Qt.AlignVCenter
-                }
+            BatteryIndicator {
+                id: batteryWidget
+                bar: notchBarStub
+                flat: true
+                layerEnabled: false
+                Layout.alignment: Qt.AlignVCenter
             }
         }
 
