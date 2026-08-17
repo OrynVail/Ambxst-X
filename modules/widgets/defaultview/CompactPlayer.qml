@@ -596,7 +596,7 @@ Item {
         id: playerPopup
         anchorItem: playerIcon
         bar: ({
-                position: Config.bar?.position ?? "top"
+                position: Config.notchPosition ?? "top"
             })
 
         contentWidth: 250

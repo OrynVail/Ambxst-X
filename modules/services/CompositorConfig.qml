@@ -40,7 +40,7 @@ QtObject {
         if (barInstances.length > 0) {
             return barInstances[0].orientation || "horizontal";
         }
-        const position = Config.bar.position || "top";
+        const position = Config.notchPosition || "top";
         return (position === "left" || position === "right") ? "vertical" : "horizontal";
     }
 
@@ -361,8 +361,8 @@ QtObject {
     }
 
     property Connections barConnections: Connections {
-        target: Config.bar
-        function onPositionChanged() {
+        target: Config
+        function onNotchPositionChanged() {
             applyCompositorConfig();
         }
     }

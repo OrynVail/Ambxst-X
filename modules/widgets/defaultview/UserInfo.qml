@@ -1,31 +1,79 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Quickshell.Widgets
 import qs.modules.theme
 import qs.modules.services
 import qs.modules.globals
 import qs.config
 
+// The avatar: centrepiece of the notch row. Content is whatever the user points
+// ~/.face.icon at, so nothing here assumes anything about the image.
 Item {
-    implicitWidth: avatarClip.width
-    implicitHeight: 40
+    id: root
 
-    Process {
-        id: hostnameProcess
-        command: ["hostname"]
-        running: true
+    readonly property int avatarSize: 28
 
-        stdout: StdioCollector {
-            id: hostnameCollector
-            waitForEnd: true
+    implicitWidth: avatarSize
+    implicitHeight: avatarSize
 
-            onStreamFinished: {}
+    readonly property bool hasAvatar: avatar.status === Image.Ready
+
+    scale: mouseArea.containsMouse ? 1.08 : 1.0
+
+    Behavior on scale {
+        enabled: Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 2
+            easing.type: Easing.OutCubic
         }
     }
 
+    ClippingRectangle {
+        id: avatarClip
+        anchors.centerIn: parent
+        width: root.avatarSize
+        height: root.avatarSize
+        radius: width / 2
+        color: Colors.surface
+
+        Image {
+            id: avatar
+            anchors.fill: parent
+            // GlobalStates.pickUserAvatar() bumps avatarCacheBuster after copying
+            // a new file in; the query string forces a reload
+            source: `file://${Quickshell.env("HOME")}/.face.icon` + (GlobalStates.avatarCacheBuster ? `?${GlobalStates.avatarCacheBuster}` : "")
+            // Any aspect ratio — crop to the centre of the square
+            fillMode: Image.PreserveAspectCrop
+            sourceSize: Qt.size(root.avatarSize * 3, root.avatarSize * 3)
+            smooth: true
+            asynchronous: true
+            cache: false
+        }
+
+        // Fallback when the file is missing or unreadable
+        Text {
+            anchors.centerIn: parent
+            visible: !root.hasAvatar
+            text: Icons.user
+            font.family: Icons.font
+            font.pixelSize: Math.round(root.avatarSize * 0.55)
+            color: Colors.overSurfaceVariant
+        }
+    }
+
+    // Hairline containment edge, so both very dark and very bright avatars still
+    // read as a circle against the notch
+    Rectangle {
+        anchors.fill: avatarClip
+        radius: width / 2
+        color: "transparent"
+        border.width: 1
+        border.color: Colors.overBackground
+        opacity: 0.15
+    }
+
     MouseArea {
-        id: userHostArea
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -41,51 +89,6 @@ Item {
             } else {
                 GlobalStates.dashboardCurrentTab = 0;
                 Visibilities.setActiveModule("dashboard");
-            }
-        }
-
-        Row {
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 8
-
-            Item {
-                width: 24
-                height: 24
-
-                ClippingRectangle {
-                    id: avatarClip
-                    anchors.centerIn: parent
-                    width: 24
-                    height: 24
-                    radius: Styling.radius(0)
-                    clip: true
-
-                    Image {
-                        anchors.fill: parent
-                        source: `file://${Quickshell.env("HOME")}/.face.icon`
-                        fillMode: Image.PreserveAspectCrop
-                    }
-                }
-            }
-
-            Text {
-                id: userHostText
-                anchors.verticalCenter: parent.verticalCenter
-                text: `${Quickshell.env("USER")}@${hostnameCollector.text.trim()}`
-                color: userHostArea.pressed ? Colors.overBackground : (userHostArea.containsMouse ? Styling.srItem("overprimary") : Colors.overBackground)
-                font.family: Config.theme.font
-                font.pixelSize: Styling.fontSize(0)
-                font.weight: Font.Bold
-                elide: Text.ElideRight
-                width: Math.min(implicitWidth, 180 - avatarClip.width - 8)
-                visible: false
-
-                Behavior on color {
-                    enabled: Config.animDuration > 0
-                    ColorAnimation {
-                        duration: Config.animDuration / 2
-                    }
-                }
             }
         }
     }

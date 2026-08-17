@@ -17,6 +17,8 @@ Button {
     property bool iconFullTint: false
     property int iconSize: 18
     property bool enableShadow: true
+    // Button.flat is inherited (and FINAL): when set, drop the background and
+    // fill-on-hover, and grow on hover instead.
     // Radius handling
     property real radius: 0
     property bool vertical: false // Set by parent if needed, or inferred? ToggleButton doesn't know orientation usually.
@@ -32,8 +34,8 @@ Button {
 
     background: StyledRect {
         id: bg
-        variant: "bg"
-        enableShadow: root.enableShadow && Config.showBackground
+        variant: root.flat ? "transparent" : "bg"
+        enableShadow: root.enableShadow && Config.showBackground && !root.flat
 
         // Map start/end to corners based on vertical property
         topLeftRadius: root.vertical ? root.startRadius : root.startRadius
@@ -43,6 +45,7 @@ Button {
 
         Rectangle {
             anchors.fill: parent
+            visible: !root.flat
             color: parent.item || "transparent"
             opacity: root.pressed ? 0.5 : (root.hovered ? 0.25 : 0)
             radius: parent.radius ?? 0
@@ -56,6 +59,29 @@ Button {
         }
     }
 
+
+    // Rest brightness matched to the workspace pill; full strength on hover
+    opacity: root.flat ? ((root.hovered || root.pressed) ? 1.0 : 0.85) : 1.0
+    Behavior on opacity {
+        enabled: Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 2
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    // Flat buttons grow slightly on hover instead of filling a background.
+    // scale is a render transform, so this never reflows the row.
+    scale: (root.flat && (root.hovered || root.pressed)) ? 1.12 : 1.0
+
+    Behavior on scale {
+        enabled: Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 2
+            easing.type: Easing.OutCubic
+        }
+    }
+
     contentItem: Item {
         // Text icon (single character)
         Text {
@@ -65,9 +91,22 @@ Button {
             textFormat: Text.RichText
             font.family: Icons.font
             font.pixelSize: 18
-            color: root.pressed ? Colors.background : (Styling.srItem("overprimary") || Colors.foreground)
+            color: {
+                if (root.pressed && !root.flat)
+                    return Colors.background;
+                if (root.flat && (root.hovered || root.pressed))
+                    return Colors.primary;
+                return Styling.srItem("overprimary") || Colors.foreground;
+            }
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
+
+            Behavior on color {
+                enabled: Config.animDuration > 0
+                ColorAnimation {
+                    duration: Config.animDuration / 2
+                }
+            }
         }
 
         // Image icon (SVG/PNG)

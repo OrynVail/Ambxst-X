@@ -15,10 +15,35 @@ Item {
     property bool vertical: bar.orientation === "vertical"
     property bool isHovered: false
     property bool layerEnabled: true
+    // Drop the button background/shadow (for hosting inside the notch)
+    property bool flat: false
 
     property real radius: 0
     property real startRadius: radius
     property real endRadius: radius
+
+
+    // Rest brightness matched to the workspace pill; full strength on hover
+    opacity: root.flat ? ((root.isHovered || root.popupOpen) ? 1.0 : 0.85) : 1.0
+    Behavior on opacity {
+        enabled: Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 2
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    // Flat mode grows on hover rather than filling a circle
+    scale: (root.flat && (root.isHovered || root.popupOpen)) ? 1.12 : 1.0
+
+    Behavior on scale {
+        enabled: Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 2
+            easing.type: Easing.OutCubic
+        }
+    }
+
 
     // Popup visibility state
     property bool popupOpen: batteryPopup.isOpen
@@ -51,21 +76,23 @@ Item {
     // Main button with circular progress
     StyledRect {
         id: buttonBg
-        variant: root.popupOpen ? "primary" : "bg"
+        // Flat stays transparent even while the popup is open — no filled circle
+        variant: root.flat ? "transparent" : (root.popupOpen ? "primary" : "bg")
         anchors.fill: parent
-        enableShadow: root.layerEnabled
+        enableShadow: root.layerEnabled && !root.flat
 
         topLeftRadius: root.vertical ? root.startRadius : root.startRadius
         topRightRadius: root.vertical ? root.startRadius : root.endRadius
         bottomLeftRadius: root.vertical ? root.endRadius : root.startRadius
         bottomRightRadius: root.vertical ? root.endRadius : root.endRadius
 
-        // Background highlight on hover
+        // Only the non-flat variant fills on hover
         Rectangle {
             anchors.fill: parent
+            visible: !root.flat
             color: Styling.srItem("overprimary")
             opacity: root.popupOpen ? 0 : (root.isHovered ? 0.25 : 0)
-            radius: parent.radius ?? 0
+            radius: root.radius
 
             Behavior on opacity {
                 enabled: Config.animDuration > 0
@@ -158,7 +185,11 @@ Item {
             text: Battery.available ? (Battery.isPluggedIn ? Icons.plug : Icons.lightning) : PowerProfile.getProfileIcon(PowerProfile.currentProfile)
             font.family: Icons.font
             font.pixelSize: Battery.available ? 14 : 18
-            color: root.popupOpen ? buttonBg.item : Colors.overBackground
+            color: {
+                if (root.flat)
+                    return (root.isHovered || root.popupOpen) ? Colors.primary : Colors.overBackground;
+                return root.popupOpen ? buttonBg.item : Colors.overBackground;
+            }
 
             Behavior on color {
                 enabled: Config.animDuration > 0

@@ -107,7 +107,7 @@ Singleton {
     }
 
     function getBarOrientation() {
-        const position = Config.bar.position || "top";
+        const position = Config.notchPosition || "top";
         return (position === "left" || position === "right") ? "vertical" : "horizontal";
     }
 
@@ -498,8 +498,8 @@ Singleton {
 
     // Bar position connection (for workspace animation orientation)
     property Connections barConnections: Connections {
-        target: Config.bar
-        function onPositionChanged() { writeTomlFile(); }
+        target: Config
+        function onNotchPositionChanged() { writeTomlFile(); }
     }
 
     // GlobalStates connection (for layout)

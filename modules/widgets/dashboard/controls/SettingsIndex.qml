@@ -147,23 +147,7 @@ QtObject {
         { label: "Ambxst", keywords: "about info credits version shell", section: 8, subSection: "", subLabel: "", icon: Qt.resolvedUrl("../../../../assets/ambxst/ambxst-icon.svg"), isIcon: false },
         
         // Ambxst > Bar
-        { label: "Bar", keywords: "panel taskbar top bottom", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Bar Position", keywords: "top bottom left right edge", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Launcher Icon", keywords: "logo symbol path", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Launcher Icon Tint", keywords: "color theme", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.palette, isIcon: true },
-        { label: "Launcher Icon Full Tint", keywords: "monochrome color", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.palette, isIcon: true },
-        { label: "Launcher Icon Size", keywords: "width height pixels", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Pill Style", keywords: "squished roundness radius bar", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Firefox Player", keywords: "browser media music", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Bar Auto-hide", keywords: "autohide hide show reveal", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Pinned on Startup", keywords: "show visible default", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Hover to Reveal", keywords: "mouse show hide edge", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Hover Region Height", keywords: "pixels trigger area", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Show Pin Button", keywords: "toggle pin unpin", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Available on Fullscreen", keywords: "overlay game video", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Show Running Indicators", keywords: "dots active apps", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Show Overview Button", keywords: "workspace switcher", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
-        { label: "Bar Screens", keywords: "monitor display eDP", section: 8, subSection: "bar", subLabel: "Ambxst > Bar", icon: Icons.layout, isIcon: true },
+        { label: "Firefox Player", keywords: "browser media music", section: 8, subSection: "notch", subLabel: "Ambxst > Notch", icon: Icons.layout, isIcon: true },
         
         // Ambxst > Notch
         { label: "Notch", keywords: "island dynamic island center", section: 8, subSection: "notch", subLabel: "Ambxst > Notch", icon: Icons.layout, isIcon: true },

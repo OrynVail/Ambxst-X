@@ -43,12 +43,6 @@ PanelWindow {
     // True when notch modules are open OR any FocusGrab is active (e.g., BarPopups).
     readonly property bool needsFullScreenInput: notchContent.screenNotchOpen || FocusGrabManager.hasActiveGrab
 
-    readonly property bool barEnabled: {
-        if (!Config.barReady) return false;
-        const list = Config.bar.screenList;
-        return (!list || list.length === 0 || list.indexOf(targetScreen.name) !== -1);
-    }
-
     readonly property bool dockEnabled: {
         if (!Config.dockReady) return false;
         if (!(Config.dock.enabled ?? false) || (Config.dock.theme ?? "default") === "integrated")
@@ -57,30 +51,21 @@ PanelWindow {
         return (!list || list.length === 0 || list.indexOf(targetScreen.name) !== -1);
     }
 
-    readonly property alias barPosition: barContent.barPosition
-    readonly property alias barPinned: barContent.pinned
-    readonly property alias barHoverActive: barContent.hoverActive
-    readonly property alias barFullscreen: barContent.activeWindowFullscreen
-    readonly property bool barReveal: barEnabled && barContent.reveal
-    readonly property alias barTargetWidth: barContent.barTargetWidth
-    readonly property alias barTargetHeight: barContent.barTargetHeight
-    readonly property alias barOuterMargin: barContent.baseOuterMargin
-
     readonly property alias dockPosition: dockContent.position
     readonly property alias dockPinned: dockContent.pinned
     readonly property bool dockReveal: dockEnabled && dockContent.reveal
     readonly property alias dockFullscreen: dockContent.activeWindowFullscreen
     readonly property int dockHeight: dockContent.dockSize + dockContent.totalMargin
 
+    readonly property string notchPosition: Config.notchPosition ?? "top"
+    readonly property alias notchReservedHeight: notchContent.reservedHeight
     readonly property alias notchHoverActive: notchContent.hoverActive
     readonly property alias notchOpen: notchContent.screenNotchOpen
     readonly property alias notchReveal: notchContent.reveal
 
     // Generic names for external compatibility (Visibilities expects these on the panel object)
-    readonly property alias pinned: barContent.pinned
-    readonly property bool reveal: barEnabled ? barContent.reveal : false
-    readonly property alias hoverActive: barContent.hoverActive // Default hoverActive points to bar
-    readonly property alias notch_hoverActive: notchContent.hoverActive // Used by bar to check notch
+    readonly property alias reveal: notchContent.reveal
+    readonly property alias hoverActive: notchContent.hoverActive
 
     readonly property bool unifiedEffectActive: false // Flag to notify children to disable internal borders
 
@@ -108,19 +93,11 @@ PanelWindow {
         return false;
     }
 
-    // Proxy properties for Bar/Notch synchronization
-    // Note: BarContent and NotchContent already handle their internal sync using Visibilities.
-
-    // Helper properties for shadow logic
-    readonly property bool keepBarShadow: Config.bar.keepBarShadow ?? false
-    readonly property bool keepBarBorder: Config.bar.keepBarBorder ?? false
-    readonly property bool containBar: Config.bar.containBar && (Config.bar.frameEnabled ?? false)
-
     Component.onCompleted: {
+        // barPanels is still the registry key other modules look this panel up by
         Visibilities.registerBarPanel(screen.name, unifiedPanel);
         Visibilities.registerNotchPanel(screen.name, unifiedPanel);
         Visibilities.registerDockPanel(screen.name, dockContent);
-        Visibilities.registerBar(screen.name, barContent);
         Visibilities.registerNotch(screen.name, notchContent.notchContainerRef);
         Visibilities.registerDock(screen.name, dockContent);
     }
@@ -129,7 +106,6 @@ PanelWindow {
         Visibilities.unregisterBarPanel(screen.name);
         Visibilities.unregisterNotchPanel(screen.name);
         Visibilities.unregisterDockPanel(screen.name);
-        Visibilities.unregisterBar(screen.name);
         Visibilities.unregisterNotch(screen.name);
         Visibilities.unregisterDock(screen.name);
     }
@@ -147,9 +123,6 @@ PanelWindow {
         // Full-screen capture when any module/popup is open
         item: unifiedPanel.needsFullScreenInput ? fullScreenMask : null
         regions: [
-            Region {
-                item: barContent.visible ? barContent.barHitbox : null
-            },
             Region {
                 item: notchContent.notchHitbox
             },
@@ -205,14 +178,6 @@ PanelWindow {
             targetScreen: unifiedPanel.targetScreen
             hasFullscreenWindow: unifiedPanel.hasFullscreenWindow
             z: 1
-        }
-
-        BarContent {
-            id: barContent
-            anchors.fill: parent
-            screen: unifiedPanel.targetScreen
-            z: 2
-            visible: unifiedPanel.barEnabled
         }
 
         DockContent {

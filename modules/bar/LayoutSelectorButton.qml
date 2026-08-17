@@ -15,10 +15,24 @@ Item {
     property bool vertical: bar.orientation === "vertical"
     property bool isHovered: false
     property bool layerEnabled: true
+    // Flat: no background, glyph glows on hover instead
+    property bool flat: false
     
     property real radius: 0
     property real startRadius: radius
     property real endRadius: radius
+
+    // Flat mode grows on hover rather than filling a background
+    scale: (root.flat && (root.isHovered || root.popupOpen)) ? 1.12 : 1.0
+
+    Behavior on scale {
+        enabled: Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 2
+            easing.type: Easing.OutCubic
+        }
+    }
+
 
     // Popup visibility state (tracks intent, not animation)
     property bool popupOpen: layoutPopup.isOpen
@@ -63,9 +77,9 @@ Item {
     // Main button
     StyledRect {
         id: buttonBg
-        variant: root.popupOpen ? "primary" : "bg"
+        variant: root.flat ? "transparent" : (root.popupOpen ? "primary" : "bg")
         anchors.fill: parent
-        enableShadow: root.layerEnabled
+        enableShadow: root.layerEnabled && !root.flat
 
         topLeftRadius: root.vertical ? root.startRadius : root.startRadius
         topRightRadius: root.vertical ? root.startRadius : root.endRadius
@@ -74,6 +88,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
+            visible: !root.flat
             color: Styling.srItem("overprimary")
             opacity: root.popupOpen ? 0 : (root.isHovered ? 0.25 : 0)
             radius: parent.radius ?? 0
@@ -91,7 +106,18 @@ Item {
             text: root.getLayoutIcon(GlobalStates.compositorLayout)
             font.family: Icons.font
             font.pixelSize: 18
-            color: root.popupOpen ? buttonBg.item : Styling.srItem("overprimary")
+            color: {
+                if (root.flat)
+                    return (root.isHovered || root.popupOpen) ? Colors.primary : Colors.overBackground;
+                return root.popupOpen ? buttonBg.item : Styling.srItem("overprimary");
+            }
+
+            Behavior on color {
+                enabled: Config.animDuration > 0
+                ColorAnimation {
+                    duration: Config.animDuration / 2
+                }
+            }
         }
 
         MouseArea {

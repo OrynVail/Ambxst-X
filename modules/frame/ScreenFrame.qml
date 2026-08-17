@@ -40,7 +40,6 @@ Item {
     readonly property int thickness: hasFullscreenWindow ? 0 : baseThickness
 
     readonly property alias innerRadius: frameContent.innerRadius
-    readonly property bool containBar: Config.bar?.containBar ?? false
 
     readonly property bool sidebarActive: false
     readonly property bool sidebarPinned: false
@@ -50,7 +49,7 @@ Item {
     readonly property int sidebarMargin: 0
     readonly property int sidebarExpansion: 0
 
-    readonly property string barPos: Config.bar?.position ?? "top"
+    readonly property string barPos: Config.notchPosition ?? "top"
     // Bar height is 44. Total size = Thickness (Outer) + Bar (44) + Thickness (Inner)
     readonly property int barExpansion: 44 + thickness
     readonly property int topThickness: hasFullscreenWindow ? 0 : (thickness + ((containBar && barPos === "top") ? barExpansion : 0))

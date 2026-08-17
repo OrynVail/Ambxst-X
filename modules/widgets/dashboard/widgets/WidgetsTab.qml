@@ -23,9 +23,33 @@ Rectangle {
         anchors.fill: parent
         spacing: 8
 
-        FullPlayer {
+        // Media card + widgets relocated off the bar
+        ColumnLayout {
+            id: leftColumn
+            // Nested layouts default to Layout.fillWidth: true, which would eat the
+            // whole row and squeeze the notification panel to nothing.
+            Layout.fillWidth: false
             Layout.preferredWidth: 216
+            Layout.maximumWidth: 216
             Layout.fillHeight: true
+            spacing: 8
+
+            FullPlayer {
+                Layout.fillWidth: true
+                Layout.preferredHeight: implicitHeight
+            }
+
+            // Relocated off the bar: window layout, tools, system tray
+            ShellWidgets {
+                Layout.fillWidth: true
+                Layout.preferredHeight: implicitHeight
+            }
+
+            // Absorbs the slack so the blocks above hold their position
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
         }
 
         // Widgets column
@@ -74,6 +98,7 @@ Rectangle {
         NotificationHistory {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.minimumWidth: 240
         }
 
         // Circular controls column

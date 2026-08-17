@@ -86,15 +86,10 @@ ShellRoot {
             ReservationWindows {
                 screen: screenShellContainer.modelData
 
-                // Bar status for reservations
-                barEnabled: {
-                    const list = (Config.bar && Config.bar.screenList !== undefined ? Config.bar.screenList : []);
-                    return (!list || list.length === 0 || list.indexOf(screen.name) !== -1);
-                }
-                barPosition: unifiedPanel.barPosition
-                barPinned: unifiedPanel.pinned
-                barSize: (unifiedPanel.barPosition === "left" || unifiedPanel.barPosition === "right") ? unifiedPanel.barTargetWidth : unifiedPanel.barTargetHeight
-                barOuterMargin: unifiedPanel.barOuterMargin
+                // Notch reserves a full-width band; the area either side of the
+                // notch itself is simply blank
+                notchPosition: unifiedPanel.notchPosition
+                notchHeight: unifiedPanel.notchReservedHeight
 
                 // Dock status for reservations
                 dockEnabled: {
@@ -109,16 +104,9 @@ ShellRoot {
                 dockPosition: unifiedPanel.dockPosition
                 dockPinned: unifiedPanel.dockPinned
                 dockHeight: unifiedPanel.dockHeight
-                containBar: unifiedPanel.containBar
 
-                frameEnabled: (Config.bar && Config.bar.frameEnabled !== undefined ? Config.bar.frameEnabled : false)
-                frameThickness: (Config.bar && Config.bar.frameThickness !== undefined ? Config.bar.frameThickness : 6)
-
-                // Sidebar status for reservations
-                sidebarEnabled: GlobalStates.assistantVisible && screenShellContainer.modelData.name === GlobalStates.assistantScreenName
-                sidebarPinned: GlobalStates.assistantPinned
-                sidebarWidth: GlobalStates.assistantWidth
-                sidebarPosition: GlobalStates.assistantPosition
+                frameEnabled: Config.frame.enabled ?? false
+                frameThickness: Config.frame.thickness ?? 6
             }
         }
     }
@@ -127,7 +115,7 @@ ShellRoot {
     Variants {
         model: {
             const screens = Quickshell.screens;
-            const list = (Config.bar && Config.bar.screenList !== undefined ? Config.bar.screenList : []);
+            const list = (Config.overview && Config.overview.screenList !== undefined ? Config.overview.screenList : []);
             if (!list || list.length === 0)
                 return screens;
             return screens.filter(screen => list.indexOf(screen.name) !== -1);

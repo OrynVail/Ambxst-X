@@ -45,7 +45,13 @@ Item {
     readonly property bool screenNotchOpen: visibilities ? (visibilities.launcher || visibilities.dashboard || visibilities.powermenu || visibilities.tools) : false
     readonly property bool hasActiveNotifications: Notifications.popupList.length > 0
 
-    property int defaultHeight: Config.showBackground ? (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 44) : 44) : (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 40) : 40)
+    // Resting height of the notch. Also what gets reserved as exclusive zone,
+    // so expanding the notch overlaps windows instead of displacing them.
+    readonly property int idleHeight: 36
+
+    // Idle height follows the content; the 44 floor only applies once a module
+    // or notification has expanded the stack
+    property int defaultHeight: (screenNotchOpen || hasActiveNotifications) ? Math.max(stackContainer.height, 44) : Math.max(stackContainer.height, idleHeight)
     property int islandHeight: screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 36) : 36
 
     readonly property string position: Config.notchPosition ?? "top"

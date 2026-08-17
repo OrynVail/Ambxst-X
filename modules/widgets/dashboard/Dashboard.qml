@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
 import QtQuick.Layouts
+import qs.modules.bar
 import qs.modules.theme
 import qs.modules.components
 import qs.modules.globals
@@ -275,12 +276,36 @@ NotchAnimationBehavior {
                         onClicked: stack.navigateToTab(index)
                     }
                 }
+
+                // Window layout selector — sits under the system info tab
+                Item {
+                    width: tabsContainer.width
+                    height: width
+
+                    LayoutSelectorButton {
+                        anchors.centerIn: parent
+                        width: 36
+                        height: 36
+                        bar: navRailStub
+                        flat: true
+                        layerEnabled: false
+                    }
+                }
+            }
+
+            // LayoutSelectorButton came off the bar; it reads orientation and
+            // uses barPosition to decide which way its popup opens.
+            QtObject {
+                id: navRailStub
+                property string orientation: "vertical"
+                property string barPosition: "left"
             }
 
             // Controls button (separate at bottom)
             StyledRect {
                 id: controlsButtonContainer
-                anchors.bottom: parent.bottom
+                anchors.bottom: powerButtonContainer.top
+                anchors.bottomMargin: root.tabSpacing
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: width
@@ -301,7 +326,8 @@ NotchAnimationBehavior {
 
             Button {
                 id: controlsButton
-                anchors.bottom: parent.bottom
+                anchors.bottom: powerButtonContainer.top
+                anchors.bottomMargin: root.tabSpacing
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: width
@@ -334,11 +360,10 @@ NotchAnimationBehavior {
                 onClicked: GlobalShortcuts.toggleSettings()
             }
 
-            // Power menu button (above controls)
+            // Power menu button (bottom-most)
             StyledRect {
                 id: powerButtonContainer
-                anchors.bottom: controlsButtonContainer.top
-                anchors.bottomMargin: root.tabSpacing
+                anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: width
@@ -349,8 +374,7 @@ NotchAnimationBehavior {
 
             Button {
                 id: powerButton
-                anchors.bottom: controlsButtonContainer.top
-                anchors.bottomMargin: root.tabSpacing
+                anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: width

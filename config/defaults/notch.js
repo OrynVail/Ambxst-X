@@ -7,5 +7,10 @@ var data = {
     "keepHidden": false,
     "noMediaDisplay": "userHost",
     "customText": "Ambxst",
-    "disableHoverExpansion": true
+    "disableHoverExpansion": true,
+    "alwaysVisible": false,
+    "availableOnFullscreen": false,
+    "reserveSpace": true,
+    "use12hFormat": false,
+    "enableFirefoxPlayer": false
 }

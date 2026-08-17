@@ -9,9 +9,9 @@ Item {
 
     property bool hasFullscreenWindow: false
 
-    readonly property bool frameEnabled: Config.bar?.frameEnabled ?? false
+    readonly property bool frameEnabled: Config.frame?.enabled ?? false
     readonly property int thickness: {
-        const value = Config.bar?.frameThickness;
+        const value = Config.frame?.thickness;
         if (typeof value !== "number")
             return 6;
         return Math.max(1, Math.min(Math.round(value), 40));

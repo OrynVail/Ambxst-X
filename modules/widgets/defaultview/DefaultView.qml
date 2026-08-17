@@ -1,15 +1,19 @@
 import QtQuick
-import Quickshell.Services.Mpris
+import QtQuick.Layouts
 import qs.modules.theme
 import qs.modules.services
 import qs.modules.notch
 import qs.modules.components
+import qs.modules.bar
+import qs.modules.bar.clock
 import qs.config
 
 Item {
     id: root
     anchors.top: parent.top
     focus: false
+
+    required property var screen
 
     // Layout constants
     readonly property int notificationPadding: 16
@@ -18,7 +22,6 @@ Item {
 
     // State
     readonly property bool hasActiveNotifications: Notifications.popupList.length > 0
-    readonly property var activePlayer: MprisController.activePlayer
     property bool notchHovered: false
     property bool parentHoverActive: false
     property bool isNavigating: false
@@ -31,27 +34,19 @@ Item {
         id: contentHoverHandler
     }
 
-    readonly property bool expandedState: contentHoverHandler.hovered || notchHovered || parentHoverActive || isNavigating || Visibilities.playerMenuOpen
+    readonly property bool expandedState: contentHoverHandler.hovered || notchHovered || parentHoverActive || isNavigating
 
-    property bool mediaHoverExpanded: false
+    // Keep the notch revealed while one of its own popups is open — otherwise it
+    // auto-hides the moment the pointer leaves the notch to reach the popup.
+    readonly property bool childPopupOpen: clockWidget.popupOpen || batteryWidget.popupOpen
+    onChildPopupOpenChanged: Visibilities.notchPopupOpen = childPopupOpen
 
-    Timer {
-        id: mediaHoverTimer
-        interval: 1000
-        running: expandedState && activePlayer !== null && !hasActiveNotifications && !mediaHoverExpanded && !(Config.notch.disableHoverExpansion ?? true)
-        onTriggered: mediaHoverExpanded = true
-    }
-
-    onExpandedStateChanged: {
-        if (!expandedState) {
-            mediaHoverExpanded = false;
-        }
-    }
-
-    onActivePlayerChanged: {
-        if (!activePlayer) {
-            mediaHoverExpanded = false;
-        }
+    // Clock and BatteryIndicator were written for the bar; they only read
+    // orientation, plus barPosition for popup direction.
+    QtObject {
+        id: notchBarStub
+        property string orientation: "horizontal"
+        property string barPosition: root.notchPosition
     }
 
     property real mainRowMargin: 16
@@ -65,13 +60,25 @@ Item {
         }
     }
 
-    // Computed dimensions
-    readonly property real mainRowContentWidth: 200 + userInfo.width + separator1.width + separator2.width + notifIndicator.width + (mainRow.spacing * 4) + mainRowMargin
-    readonly property real mainRowHeight: Config.showBackground ? (Config.notchTheme === "island" ? 36 : 44) : (Config.notchTheme === "island" ? 36 : 40)
+    // Clear space either side of the avatar, so it reads as surrounded rather
+    // than as one more item in a list
+    readonly property int moat: 16
+
+    // Both flanks reserve the same width, which is what pins the avatar to the
+    // notch's true centre — it cannot drift as workspaces come and go. The
+    // lighter flank's spare room is invisible inside a solid notch.
+    readonly property real flankWidth: Math.max(leftFlank.implicitWidth, rightFlank.implicitWidth)
+    readonly property real rowContentWidth: userInfo.implicitWidth + moat * 2 + flankWidth * 2
+
+    // Computed dimensions — width now follows the row's real content
+    readonly property real mainRowContentWidth: rowContentWidth + mainRowMargin * 2
+    // Sized to the tallest element (28px avatar, ~30px hover-scaled) rather than
+    // the 36px bar buttons this row used to hold
+    readonly property real mainRowHeight: 36
     readonly property real notificationMinWidth: expandedState ? 420 : 320
     readonly property real notificationContainerHeight: notificationView.implicitHeight + notificationPaddingTop + notificationPaddingBottom
 
-    implicitWidth: Math.round((hasActiveNotifications || mediaHoverExpanded) ? Math.max(notificationMinWidth + (notificationPadding * 2), mainRowContentWidth) : mainRowContentWidth)
+    implicitWidth: Math.round(hasActiveNotifications ? Math.max(notificationMinWidth + (notificationPadding * 2), mainRowContentWidth) : mainRowContentWidth)
 
     implicitHeight: hasActiveNotifications ? mainRowHeight + notificationContainerHeight : mainRowHeight
 
@@ -84,90 +91,68 @@ Item {
         }
     }
 
-    Keys.onPressed: event => {
-        if (expandedState && activePlayer) {
-            if (event.key === Qt.Key_Space) {
-                activePlayer.togglePlaying();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Left && activePlayer.canSeek) {
-                activePlayer.position = Math.max(0, activePlayer.position - 10);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Right && activePlayer.canSeek) {
-                activePlayer.position = Math.min(activePlayer.length, activePlayer.position + 10);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Up && activePlayer.canGoPrevious) {
-                activePlayer.previous();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Down && activePlayer.canGoNext) {
-                activePlayer.next();
-                event.accepted = true;
-            }
-        }
-    }
-
-    Column {
-        anchors.fill: parent
-        spacing: 0
-
-        // If bottom position, we populate content bottom-up.
-        // But Column fills top-down. 
-        // We can move the mainRow to the bottom of this Column or use a different layout strategy.
-        // Easiest is to reverse the visual order by using move property or just conditionally rendering order? 
-        // QML items can be reordered visually? No.
-        // We can use States or just conditional anchoring if not using Column.
-        // But this uses Column.
-
-        // Reorder children based on position:
-        // Top: mainRow then notificationContainer
-        // Bottom: notificationContainer then mainRow
-        
-        // Since we cannot dynamically reorder children in a Column easily without Repeater/Loader tricks,
-        // we can use Item + Anchors instead of Column for full control.
-        
-    }
-
     Item {
         anchors.fill: parent
 
-        // mainRow container
-        Row {
+        // mainRow container: left flank | avatar | right flank.
+        // state on the left, you in the middle, actions on the right.
+        Item {
             id: mainRow
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: isBottom ? undefined : parent.top
-            anchors.bottom: isBottom ? parent.bottom : undefined
-            width: parent.width - mainRowMargin
-            height: mainRowHeight
-            spacing: 4
-            z: 2 // Ensure it stays above notifications if overlap occurs (though they shouldn't)
+            anchors.top: root.isBottom ? undefined : parent.top
+            anchors.bottom: root.isBottom ? parent.bottom : undefined
+            width: root.rowContentWidth
+            height: root.mainRowHeight
+            z: 2 // Stay above notifications if they ever overlap
 
             UserInfo {
                 id: userInfo
+                anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            Separator {
-                id: separator1
-                vert: true
+            RowLayout {
+                id: leftFlank
+                anchors.right: userInfo.left
+                anchors.rightMargin: root.moat
                 anchors.verticalCenter: parent.verticalCenter
+                spacing: 8
+
+                NotchWorkspaces {
+                    id: workspaces
+                    screen: root.screen
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                Clock {
+                    id: clockWidget
+                    bar: notchBarStub
+                    flat: true
+                    layerEnabled: false
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
 
-            CompactPlayer {
+            RowLayout {
+                id: rightFlank
+                anchors.left: userInfo.right
+                anchors.leftMargin: root.moat
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - userInfo.width - separator1.width - separator2.width - notifIndicator.width - (parent.spacing * 4)
-                height: 32
-                player: activePlayer
-                notchHovered: expandedState
-            }
+                spacing: 8
 
-            Separator {
-                id: separator2
-                vert: true
-                anchors.verticalCenter: parent.verticalCenter
-            }
+                ToolsButton {
+                    flat: true
+                    enableShadow: false
+                    Layout.alignment: Qt.AlignVCenter
+                }
 
-            NotificationIndicator {
-                id: notifIndicator
-                anchors.verticalCenter: parent.verticalCenter
+                BatteryIndicator {
+                    id: batteryWidget
+                    bar: notchBarStub
+                    flat: true
+                    layerEnabled: false
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
         }
 
@@ -175,26 +160,22 @@ Item {
         Item {
             id: notificationContainer
             width: parent.width
-            height: hasActiveNotifications ? notificationContainerHeight : 0
-            visible: hasActiveNotifications
-            
-            // Position relative to mainRow
-            anchors.top: isBottom ? undefined : mainRow.bottom
-            anchors.bottom: isBottom ? mainRow.top : undefined
-            
+            height: root.hasActiveNotifications ? root.notificationContainerHeight : 0
+            visible: root.hasActiveNotifications
+
+            anchors.top: root.isBottom ? undefined : mainRow.bottom
+            anchors.bottom: root.isBottom ? mainRow.top : undefined
+
             NotchNotificationView {
                 id: notificationView
                 anchors.fill: parent
-                // Invert padding based on position? Or keep as is?
-                // If bottom, "top" margin is visually the one close to mainRow?
-                // Let's keep padding consistent for now, but ensure proper spacing.
-                anchors.topMargin: notificationPaddingTop
-                anchors.leftMargin: notificationPadding
-                anchors.rightMargin: notificationPadding
-                anchors.bottomMargin: notificationPaddingBottom
-                visible: hasActiveNotifications
+                anchors.topMargin: root.notificationPaddingTop
+                anchors.leftMargin: root.notificationPadding
+                anchors.rightMargin: root.notificationPadding
+                anchors.bottomMargin: root.notificationPaddingBottom
+                visible: root.hasActiveNotifications
                 opacity: visible ? 1 : 0
-                notchHovered: expandedState
+                notchHovered: root.expandedState
                 onIsNavigatingChanged: root.isNavigating = isNavigating
 
                 Behavior on opacity {

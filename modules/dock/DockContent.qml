@@ -30,7 +30,7 @@ Item {
 
     // Position configuration with fallback logic to avoid bar collision
     readonly property string userPosition: Config.dock?.position ?? "bottom"
-    readonly property string barPosition: Config.bar?.position ?? "top"
+    readonly property string barPosition: Config.notchPosition ?? "top"
     readonly property string notchPosition: Config.notchPosition ?? "top"
 
     // Effective position
@@ -69,15 +69,6 @@ Item {
 
     readonly property int windowSideMargin: dockMargin > 0 ? Math.max(0, dockMargin - compositorGapsOut) : 0
     readonly property int edgeSideMargin: isDefault ? 0 : dockMargin
-
-    // Reference to the bar panel on this screen
-    readonly property var barPanelRef: Visibilities.barPanels[screen.name]
-    readonly property bool barPinned: {
-        if (barPanelRef && typeof barPanelRef.pinned !== 'undefined') {
-            return barPanelRef.pinned;
-        }
-        return true;
-    }
 
     // Monitor reference and refrence to toplevels on monitor
     readonly property var compositorMonitor: AxctlService.monitorFor(screen)
@@ -122,7 +113,7 @@ Item {
     implicitWidth: root.isVertical ? dockSize + totalMargin + shadowSpace * 2 : dockContent.implicitWidth + shadowSpace * 2
     implicitHeight: root.isVertical ? dockContent.implicitHeight + shadowSpace * 2 : dockSize + totalMargin + shadowSpace * 2
 
-    readonly property int frameOffset: Config.bar?.frameEnabled ? (Config.bar?.frameThickness ?? 6) : 0
+    readonly property int frameOffset: Config.frame?.enabled ? (Config.frame?.thickness ?? 6) : 0
 
     // The hitbox for the mask
     readonly property Item dockHitbox: dockMouseArea

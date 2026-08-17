@@ -26,38 +26,24 @@ Item {
     readonly property var screenVisibilities: Visibilities.getForScreen(screen.name)
     readonly property bool isScreenFocused: AxctlService.focusedMonitor && AxctlService.focusedMonitor.name === screen.name
 
-    // Monitor reference and refrence to toplevels on monitor
-    readonly property var compositorMonitor: AxctlService.monitorFor(screen)
-    readonly property var toplevels: (!compositorMonitor || !compositorMonitor.activeWorkspace || !AxctlService.clients.values) ? [] : AxctlService.clients.values.filter(c => c.workspace.id === compositorMonitor.activeWorkspace.id)
-
-    // Check if there are any windows on the current monitor and workspace
-    readonly property bool hasWindows: toplevels.length > 0
-
-    // Get the bar position for this screen
-    readonly property string barPosition: (Config.bar && Config.bar.position !== undefined) ? Config.bar.position : "top"
     readonly property string notchPosition: Config.notchPosition !== undefined ? Config.notchPosition : "top"
 
-    // Get the bar panel for this screen to check its state
+    // The unified panel for this screen (still registered under the bar-panel key)
     readonly property var barPanelRef: Visibilities.barPanels[screen.name]
 
-    // Check if bar is pinned (use bar state directly)
-    readonly property bool barPinned: {
-        // If barPanelRef exists, trust its pinned state explicitly
-        if (barPanelRef && typeof barPanelRef.pinned !== 'undefined') {
-            return barPanelRef.pinned;
-        }
-        // Fallback to config only if panel ref is missing
-        return (Config.bar && Config.bar.pinnedOnStartup !== undefined) ? Config.bar.pinnedOnStartup : true;
-    }
-    
-    // Check if bar is hovering (for synchronized reveal when bar is at same side)
-    readonly property bool barHoverActive: {
-        if (barPosition !== notchPosition)
-            return false;
-        if (barPanelRef && typeof barPanelRef.hoverActive !== 'undefined') {
-            return barPanelRef.hoverActive;
-        }
-        return false;
+    readonly property bool keepHidden: (Config.notch && Config.notch.keepHidden !== undefined) ? Config.notch.keepHidden : false
+    readonly property bool alwaysVisible: (Config.notch && Config.notch.alwaysVisible !== undefined) ? Config.notch.alwaysVisible : false
+    readonly property bool availableOnFullscreen: (Config.notch && Config.notch.availableOnFullscreen !== undefined) ? Config.notch.availableOnFullscreen : false
+    readonly property bool reserveSpace: (Config.notch && Config.notch.reserveSpace !== undefined) ? Config.notch.reserveSpace : true
+
+    // Exclusive-zone request: deliberately the *idle* footprint, not the live
+    // height — so opening the dashboard overlaps windows rather than shoving them
+    // down. Zero when hover-only, since a permanent gap would be wrong.
+    readonly property int reservedHeight: {
+        if (!reserveSpace || keepHidden)
+            return 0;
+        const margin = root.notchPosition === "top" ? notchContainer.anchors.topMargin : notchContainer.anchors.bottomMargin;
+        return notchContainer.idleHeight + margin;
     }
 
     // Fullscreen detection - use parent panel's robust detection, fallback to ToplevelManager
@@ -66,26 +52,22 @@ Item {
         if (barPanelRef && typeof barPanelRef.hasFullscreenWindow !== 'undefined') {
             return barPanelRef.hasFullscreenWindow;
         }
-        // Fallback: use ToplevelManager (native Wayland) like the bar does
         const toplevel = ToplevelManager.activeToplevel;
         if (!toplevel || !toplevel.activated)
             return false;
         return toplevel.fullscreen === true;
     }
 
-    // Should auto-hide logic:
-    // 1. If notch and bar are on different sides: hide if keepHidden is ON, OR if windows/fullscreen are present
-    // 2. If notch and bar are on same side: hide only if bar is unpinned OR if fullscreen is present
+    // The notch is the only panel now, so it answers to nothing but its own config:
+    // alwaysVisible pins it open, keepHidden makes it interaction-only, fullscreen
+    // hides it unless availableOnFullscreen.
     readonly property bool shouldAutoHide: {
-        if (barPosition !== notchPosition) {
-            if ((Config.notch && Config.notch.keepHidden !== undefined) ? Config.notch.keepHidden : false) return true;
-            return hasWindows || activeWindowFullscreen;
-        }
-        return !barPinned || activeWindowFullscreen;
+        if (alwaysVisible || Visibilities.notchPopupOpen)
+            return false;
+        if (keepHidden)
+            return true;
+        return activeWindowFullscreen;
     }
-
-    // Check if the bar for this screen is vertical
-    readonly property bool isBarVertical: barPosition === "left" || barPosition === "right"
 
     // Notch state properties
     readonly property bool screenNotchOpen: screenVisibilities ? (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools) : false
@@ -99,27 +81,25 @@ Item {
 
     // Reveal logic:
     readonly property bool reveal: {
-        // If keepHidden is true, ONLY show on interaction
-        // UNLESS notch and bar are on same side (e.g. both top), then keepHidden is IGNORED for sync consistency
-        if (((Config.notch && Config.notch.keepHidden !== undefined) ? Config.notch.keepHidden : false) && barPosition !== notchPosition) {
-            return (screenNotchOpen || hasActiveNotifications || hoverActive || barHoverActive);
+        // keepHidden: show only on interaction
+        if (keepHidden) {
+            return (screenNotchOpen || hasActiveNotifications || hoverActive || Visibilities.notchPopupOpen);
         }
 
-        // If fullscreen and bar is NOT available on fullscreen, hard-hide the notch too
-        // This prevents barHoverActive from leaking through when the bar itself is hidden
-        if (activeWindowFullscreen && !(Config.bar && Config.bar.availableOnFullscreen !== undefined ? Config.bar.availableOnFullscreen : false)) {
+        // Fullscreen hides the notch unless explicitly allowed
+        if (activeWindowFullscreen && !availableOnFullscreen) {
             return false;
         }
 
         // If not auto-hiding (pinned and not fullscreen), always show
         if (!shouldAutoHide) return true;
-        
+
         // Show on interaction (hover, open, notifications)
         // This works even in fullscreen, ensuring hover always works
-        if (screenNotchOpen || hasActiveNotifications || hoverActive || barHoverActive) {
+        if (screenNotchOpen || hasActiveNotifications || hoverActive) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -150,10 +130,12 @@ Item {
     // The hitbox for the mask
     readonly property Item notchHitbox: root.reveal ? notchRegionContainer : notchHoverRegion
 
-    // Default view component - user@host text
+    // Default view component - idle notch row
     Component {
         id: defaultViewComponent
-        DefaultView {}
+        DefaultView {
+            screen: root.screen
+        }
     }
 
     // Persistent views to avoid creation lag when opening the notch
@@ -277,7 +259,7 @@ Item {
                 anchors.top: root.notchPosition === "top" ? parent.top : undefined
                 anchors.bottom: root.notchPosition === "bottom" ? parent.bottom : undefined
 
-                readonly property int frameOffset: (Config.bar && Config.bar.frameEnabled && !root.activeWindowFullscreen) ? ((Config.bar.frameThickness !== undefined) ? Config.bar.frameThickness : 6) : 0
+                readonly property int frameOffset: ((Config.frame?.enabled ?? false) && !root.activeWindowFullscreen) ? (Config.frame?.thickness ?? 6) : 0
 
                 anchors.topMargin: (root.notchPosition === "top" ? (Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? 4 : 0)) : 0) + (root.notchPosition === "top" ? frameOffset : 0)
                 anchors.bottomMargin: (root.notchPosition === "bottom" ? (Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? 4 : 0)) : 0) + (root.notchPosition === "bottom" ? frameOffset : 0)

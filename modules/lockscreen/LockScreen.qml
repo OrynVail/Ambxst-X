@@ -159,7 +159,7 @@ WlSessionLockSurface {
 
             Text {
                 id: hoursText
-                text: Config.bar.use12hFormat ? (clockContainer.currentTime.getHours() % 12 || 12).toString() : Qt.formatTime(clockContainer.currentTime, "hh")
+                text: Config.notch.use12hFormat ? (clockContainer.currentTime.getHours() % 12 || 12).toString() : Qt.formatTime(clockContainer.currentTime, "hh")
                 font.family: "League Gothic"
                 font.pixelSize: 240
                 color: Colors.primaryFixed
@@ -232,14 +232,14 @@ WlSessionLockSurface {
 
             Text {
                 id: amPmText
-                text: Config.bar.use12hFormat ? Qt.formatTime(clockContainer.currentTime, "ap").toLowerCase() : ""
+                text: Config.notch.use12hFormat ? Qt.formatTime(clockContainer.currentTime, "ap").toLowerCase() : ""
                 font.family: "League Gothic"
                 font.pixelSize: 100
                 color: hoursText.color
                 antialiasing: true
                 anchors.top: hoursText.top
                 anchors.topMargin: hoursText.height * 0.35 
-                visible: Config.bar.use12hFormat
+                visible: Config.notch.use12hFormat
                 opacity: startAnim ? 1 : 0
 
                 property real slideOffset: startAnim ? 0 : -150

@@ -7,7 +7,7 @@ import qs.modules.globals
 import qs.modules.theme
 import qs.modules.services as Services
 import "defaults/theme.js" as ThemeDefaults
-import "defaults/bar.js" as BarDefaults
+import "defaults/frame.js" as FrameDefaults
 import "defaults/workspaces.js" as WorkspacesDefaults
 import "defaults/overview.js" as OverviewDefaults
 import "defaults/notch.js" as NotchDefaults
@@ -41,7 +41,7 @@ Singleton {
 
     // Module init status
     property bool themeReady: false
-    property bool barReady: false
+    property bool frameReady: false
     property bool workspacesReady: false
     property bool overviewReady: false
     property bool notchReady: false
@@ -55,7 +55,7 @@ Singleton {
     property bool dockReady: false
     property bool keybindsInitialLoadComplete: false
 
-    property bool initialLoadComplete: themeReady && barReady && workspacesReady && overviewReady && notchReady && compositorReady && performanceReady && weatherReady && desktopReady && lockscreenReady && prefixReady && systemReady && dockReady
+    property bool initialLoadComplete: themeReady && frameReady && workspacesReady && overviewReady && notchReady && compositorReady && performanceReady && weatherReady && desktopReady && lockscreenReady && prefixReady && systemReady && dockReady
 
     // Compatibility aliases
     property alias loader: themeLoader
@@ -72,7 +72,7 @@ Singleton {
             "bash", "-c",
             "mkdir -p '" + root.configDir + "' && " +
             "cp -n '" + root.presetDir + "/theme.json' '" + root.configDir + "/theme.json' 2>/dev/null || true; " +
-            "cp -n '" + root.presetDir + "/bar.json' '" + root.configDir + "/bar.json' 2>/dev/null || true; " +
+            "cp -n '" + root.presetDir + "/frame.json' '" + root.configDir + "/frame.json' 2>/dev/null || true; " +
             "cp -n '" + root.presetDir + "/workspaces.json' '" + root.configDir + "/workspaces.json' 2>/dev/null || true; " +
             "cp -n '" + root.presetDir + "/overview.json' '" + root.configDir + "/overview.json' 2>/dev/null || true; " +
             "cp -n '" + root.presetDir + "/notch.json' '" + root.configDir + "/notch.json' 2>/dev/null || true; " +
@@ -489,24 +489,24 @@ Singleton {
     }
 
     // ============================================
-    // BAR MODULE
+    // FRAME MODULE
     // ============================================
     FileView {
-        id: barLoader
-        path: root.configDir + "/bar.json"
+        id: frameLoader
+        path: root.configDir + "/frame.json"
         atomicWrites: true
         watchChanges: true
         onLoaded: {
-            if (!root.barReady) {
-                validateModule("bar", barLoader, BarDefaults.data, () => {
-                    root.barReady = true;
+            if (!root.frameReady) {
+                validateModule("frame", frameLoader, FrameDefaults.data, () => {
+                    root.frameReady = true;
                 });
             }
         }
         onLoadFailed: {
-            if (error.toString().includes("FileNotFound") && !root.barReady) {
-                handleMissingConfig("bar", barLoader, BarDefaults.data, () => {
-                    root.barReady = true;
+            if (error.toString().includes("FileNotFound") && !root.frameReady) {
+                handleMissingConfig("frame", frameLoader, FrameDefaults.data, () => {
+                    root.frameReady = true;
                 });
             }
         }
@@ -517,33 +517,14 @@ Singleton {
         }
         onPathChanged: reload()
         onAdapterUpdated: {
-            if (root.barReady && !root.pauseAutoSave) {
-                barLoader.writeAdapter();
+            if (root.frameReady && !root.pauseAutoSave) {
+                frameLoader.writeAdapter();
             }
         }
 
         adapter: JsonAdapter {
-            property string position: "top"
-            property string launcherIcon: ""
-            property bool launcherIconTint: true
-            property bool launcherIconFullTint: true
-            property int launcherIconSize: 24
-            property string pillStyle: "default"
-            property list<string> screenList: []
-            property bool enableFirefoxPlayer: false
-            property list<var> barColor: [["surface", 0.0]]
-            property bool frameEnabled: false
-            property int frameThickness: 6
-            // Auto-hide settings
-            property bool pinnedOnStartup: true
-            property bool hoverToReveal: true
-            property int hoverRegionHeight: 8
-            property bool showPinButton: true
-            property bool availableOnFullscreen: false
-            property bool use12hFormat: false
-            property bool containBar: false
-            property bool keepBarShadow: false
-            property bool keepBarBorder: false
+            property bool enabled: false
+            property int thickness: 6
         }
     }
 
@@ -625,10 +606,12 @@ Singleton {
         }
 
         adapter: JsonAdapter {
+            property bool enabled: true
             property int rows: 2
             property int columns: 5
             property real scale: 0.1
             property real workspaceSpacing: 4
+            property list<string> screenList: []
         }
     }
 
@@ -674,6 +657,11 @@ Singleton {
             property string noMediaDisplay: "userHost"
             property string customText: "Ambxst"
             property bool disableHoverExpansion: true
+            property bool alwaysVisible: false
+            property bool availableOnFullscreen: false
+            property bool reserveSpace: true
+            property bool use12hFormat: false
+            property bool enableFirefoxPlayer: false
         }
     }
 
@@ -3334,7 +3322,7 @@ Singleton {
     }
 
     // Bar configuration
-    property QtObject bar: barLoader.adapter
+    property QtObject frame: frameLoader.adapter
     property bool showBackground: theme.srBarBg.opacity > 0
 
     // Workspace configuration
@@ -3357,11 +3345,7 @@ Singleton {
             if (dock.position === "bottom") {
                 console.log("Notch moved to bottom, adjusting Dock position...");
                 // Offset Dock to avoid notch
-                if (bar.position === "left") {
-                    dock.position = "right";
-                } else {
-                    dock.position = "left";
-                }
+                dock.position = "left";
                 // Trigger save
                 GlobalStates.markShellChanged();
             }
@@ -3414,7 +3398,7 @@ Singleton {
 
     // Module save functions
     function saveBar() {
-        barLoader.writeAdapter();
+        frameLoader.writeAdapter();
     }
     function saveWorkspaces() {
         workspacesLoader.writeAdapter();

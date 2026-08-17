@@ -19,6 +19,8 @@ Singleton {
     property string lastFocusedScreen: ""
     property var contextMenu: null
     property bool playerMenuOpen: false
+    // A popup owned by a notch widget (clock, battery) is open — holds the notch revealed
+    property bool notchPopupOpen: false
     readonly property var moduleNames: ["launcher", "dashboard", "overview", "powermenu", "tools"]
 
     function setContextMenu(menu) {

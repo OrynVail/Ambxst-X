@@ -341,10 +341,10 @@ Singleton {
 
     // Shell config sections and their properties
     readonly property var _shellSections: {
-        "bar": ["position", "launcherIcon", "launcherIconTint", "launcherIconFullTint", "launcherIconSize", "enableFirefoxPlayer", "screenList", "frameEnabled", "frameThickness", "pinnedOnStartup", "hoverToReveal", "hoverRegionHeight", "showPinButton", "availableOnFullscreen", "pillStyle", "use12hFormat", "containBar", "keepBarShadow", "keepBarBorder"],
-        "notch": ["theme", "position", "hoverRegionHeight", "keepHidden"],
+        "frame": ["enabled", "thickness"],
+        "notch": ["theme", "position", "hoverRegionHeight", "keepHidden", "noMediaDisplay", "customText", "disableHoverExpansion", "alwaysVisible", "availableOnFullscreen", "reserveSpace", "use12hFormat", "enableFirefoxPlayer"],
         "workspaces": ["shown", "showAppIcons", "alwaysShowNumbers", "showNumbers", "dynamic"],
-        "overview": ["rows", "columns", "scale", "workspaceSpacing"],
+        "overview": ["enabled", "rows", "columns", "scale", "workspaceSpacing", "screenList"],
         "dock": ["enabled", "theme", "position", "height", "iconSize", "spacing", "margin", "hoverRegionHeight", "pinnedOnStartup", "hoverToReveal", "availableOnFullscreen", "showRunningIndicators", "showPinButton", "showOverviewButton", "screenList", "keepHidden"],
         "lockscreen": ["position"],
         "desktop": ["enabled", "iconSize", "spacingVertical", "textColor"],

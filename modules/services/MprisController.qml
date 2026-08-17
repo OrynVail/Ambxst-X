@@ -15,7 +15,7 @@ Singleton {
     property var filteredPlayers: {
         const filtered = Mpris.players.values.filter(player => {
             const dbusName = (player.dbusName || "").toLowerCase();
-            if (!Config.bar.enableFirefoxPlayer && dbusName.includes("firefox")) {
+            if (!Config.notch.enableFirefoxPlayer && dbusName.includes("firefox")) {
                 return false;
             }
             return true;
@@ -155,7 +155,7 @@ Singleton {
 
             Component.onCompleted: {
                 const dbusName = (modelData.dbusName || "").toLowerCase();
-                const shouldIgnore = !Config.bar.enableFirefoxPlayer && dbusName.includes("firefox");
+                const shouldIgnore = !Config.notch.enableFirefoxPlayer && dbusName.includes("firefox");
 
                 if (!shouldIgnore && (root.trackedPlayer == null || modelData.isPlaying)) {
                     root.trackedPlayer = modelData;
