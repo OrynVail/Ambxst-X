@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Thumbnail Generator for Ambxst Wallpaper System
+Thumbnail Generator for Flokshell Wallpaper System
 Generates thumbnails for video files, images, and GIFs using FFmpeg and ImageMagick with multithreading.
 """
 
@@ -442,7 +442,7 @@ class ThumbnailGenerator:
 
     def run(self) -> int:
         """Main execution function."""
-        print("🖼️  Ambxst Thumbnail Generator")
+        print("🖼️  Flokshell Thumbnail Generator")
         print("=" * 40)
 
         # Load configuration

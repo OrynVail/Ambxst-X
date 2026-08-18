@@ -33,9 +33,9 @@ Singleton {
         onLoaded: root.version = text().trim()
     }
 
-    property string configDir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/ambxst/config"
-    property string keybindsPath: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/ambxst/binds.json"
-    property string presetDir: Qt.resolvedUrl("../assets/presets/Ambxst Default").toString().replace("file://", "")
+    property string configDir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/flokshell/config"
+    property string keybindsPath: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/flokshell/binds.json"
+    property string presetDir: Qt.resolvedUrl("../assets/presets/Flokshell Default").toString().replace("file://", "")
 
     property bool pauseAutoSave: false
 
@@ -993,15 +993,15 @@ Singleton {
             property bool updateServiceEnabled: true
             property JsonObject idle: JsonObject {
                 property JsonObject general: JsonObject {
-                    property string lock_cmd: "ambxst lock"
+                    property string lock_cmd: "flok lock"
                     property string before_sleep_cmd: "loginctl lock-session"
-                    property string after_sleep_cmd: "ambxst screen on"
+                    property string after_sleep_cmd: "flok screen on"
                 }
                 property list<var> listeners: [
                     {
                         "timeout": 150,
-                        "onTimeout": "ambxst brightness 10 -s",
-                        "onResume": "ambxst brightness -r"
+                        "onTimeout": "flok brightness 10 -s",
+                        "onResume": "flok brightness -r"
                     },
                     {
                         "timeout": 300,
@@ -1009,12 +1009,12 @@ Singleton {
                     },
                     {
                         "timeout": 330,
-                        "onTimeout": "ambxst screen off",
-                        "onResume": "ambxst screen on"
+                        "onTimeout": "flok screen off",
+                        "onResume": "flok screen on"
                     },
                     {
                         "timeout": 1800,
-                        "onTimeout": "ambxst suspend"
+                        "onTimeout": "flok suspend"
                     }
                 ]
             }
@@ -1163,72 +1163,72 @@ Singleton {
             const current = JSON.parse(raw);
             let needsUpdate = false;
 
-            // Ensure ambxst structure exists
-            if (!current.ambxst) {
-                current.ambxst = {};
+            // Ensure flokshell structure exists
+            if (!current.flokshell) {
+                current.flokshell = {};
                 needsUpdate = true;
             }
 
             // Migrate nested to flat structure
-            if (current.ambxst.dashboard && typeof current.ambxst.dashboard === "object" && !current.ambxst.dashboard.modifiers) {
-                console.log("Migrating nested ambxst binds to flat structure...");
-                const nested = current.ambxst.dashboard;
+            if (current.flokshell.dashboard && typeof current.flokshell.dashboard === "object" && !current.flokshell.dashboard.modifiers) {
+                console.log("Migrating nested flokshell binds to flat structure...");
+                const nested = current.flokshell.dashboard;
                 
                 // Map old names to new names and update arguments
                 if (nested.widgets) {
-                    current.ambxst.launcher = nested.widgets;
-                    current.ambxst.launcher.argument = "ambxst run launcher";
-                    current.ambxst.launcher.action = createAction(current.ambxst.launcher);
+                    current.flokshell.launcher = nested.widgets;
+                    current.flokshell.launcher.argument = "flok run launcher";
+                    current.flokshell.launcher.action = createAction(current.flokshell.launcher);
                 }
                 if (nested.dashboard) {
-                    current.ambxst.dashboard = nested.dashboard;
-                    current.ambxst.dashboard.argument = "ambxst run dashboard";
-                    current.ambxst.dashboard.action = createAction(current.ambxst.dashboard);
+                    current.flokshell.dashboard = nested.dashboard;
+                    current.flokshell.dashboard.argument = "flok run dashboard";
+                    current.flokshell.dashboard.action = createAction(current.flokshell.dashboard);
                 }
                 if (nested.assistant) {
-                    current.ambxst.assistant = nested.assistant;
-                    current.ambxst.assistant.argument = "ambxst run assistant";
-                    current.ambxst.assistant.action = createAction(current.ambxst.assistant);
+                    current.flokshell.assistant = nested.assistant;
+                    current.flokshell.assistant.argument = "flok run assistant";
+                    current.flokshell.assistant.action = createAction(current.flokshell.assistant);
                 }
                 if (nested.clipboard) {
-                    current.ambxst.clipboard = nested.clipboard;
-                    current.ambxst.clipboard.argument = "ambxst run clipboard";
-                    current.ambxst.clipboard.action = createAction(current.ambxst.clipboard);
+                    current.flokshell.clipboard = nested.clipboard;
+                    current.flokshell.clipboard.argument = "flok run clipboard";
+                    current.flokshell.clipboard.action = createAction(current.flokshell.clipboard);
                 }
                 if (nested.emoji) {
-                    current.ambxst.emoji = nested.emoji;
-                    current.ambxst.emoji.argument = "ambxst run emoji";
-                    current.ambxst.emoji.action = createAction(current.ambxst.emoji);
+                    current.flokshell.emoji = nested.emoji;
+                    current.flokshell.emoji.argument = "flok run emoji";
+                    current.flokshell.emoji.action = createAction(current.flokshell.emoji);
                 }
                 if (nested.notes) {
-                    current.ambxst.notes = nested.notes;
-                    current.ambxst.notes.argument = "ambxst run notes";
-                    current.ambxst.notes.action = createAction(current.ambxst.notes);
+                    current.flokshell.notes = nested.notes;
+                    current.flokshell.notes.argument = "flok run notes";
+                    current.flokshell.notes.action = createAction(current.flokshell.notes);
                 }
                 if (nested.tmux) {
-                    current.ambxst.tmux = nested.tmux;
-                    current.ambxst.tmux.argument = "ambxst run tmux";
-                    current.ambxst.tmux.action = createAction(current.ambxst.tmux);
+                    current.flokshell.tmux = nested.tmux;
+                    current.flokshell.tmux.argument = "flok run tmux";
+                    current.flokshell.tmux.action = createAction(current.flokshell.tmux);
                 }
                 if (nested.wallpapers) {
-                    current.ambxst.wallpapers = nested.wallpapers;
-                    current.ambxst.wallpapers.argument = "ambxst run wallpapers";
-                    current.ambxst.wallpapers.action = createAction(current.ambxst.wallpapers);
+                    current.flokshell.wallpapers = nested.wallpapers;
+                    current.flokshell.wallpapers.argument = "flok run wallpapers";
+                    current.flokshell.wallpapers.action = createAction(current.flokshell.wallpapers);
                 }
 
                 // Remove the old nested object
-                delete current.ambxst.dashboard;
+                delete current.flokshell.dashboard;
                 needsUpdate = true;
             }
 
-            if (!current.ambxst.system) {
-                current.ambxst.system = {};
+            if (!current.flokshell.system) {
+                current.flokshell.system = {};
                 needsUpdate = true;
             }
 
             // Get default binds from adapter
             const adapter = keybindsLoader.adapter;
-            if (!adapter || !adapter.ambxst) return;
+            if (!adapter || !adapter.flokshell) return;
 
             // Helper function to create clean bind object
             function createAction(bindObj) {
@@ -1246,18 +1246,18 @@ Singleton {
                 };
             }
 
-            // Check ambxst core binds
-            const ambxstKeys = ["launcher", "dashboard", "clipboard", "emoji", "notes", "tmux", "wallpapers"];
-            for (const key of ambxstKeys) {
-                if (!current.ambxst[key] && adapter.ambxst[key]) {
-                    console.log("Adding missing ambxst bind:", key);
-                    current.ambxst[key] = createCleanBind(adapter.ambxst[key]);
+            // Check flokshell core binds
+            const flokshellKeys = ["launcher", "dashboard", "clipboard", "emoji", "notes", "tmux", "wallpapers"];
+            for (const key of flokshellKeys) {
+                if (!current.flokshell[key] && adapter.flokshell[key]) {
+                    console.log("Adding missing flokshell bind:", key);
+                    current.flokshell[key] = createCleanBind(adapter.flokshell[key]);
                     needsUpdate = true;
-                } else if (current.ambxst[key] && !current.ambxst[key].action) {
-                    current.ambxst[key].action = createAction(current.ambxst[key]);
-                    delete current.ambxst[key].dispatcher;
-                    delete current.ambxst[key].argument;
-                    delete current.ambxst[key].flags;
+                } else if (current.flokshell[key] && !current.flokshell[key].action) {
+                    current.flokshell[key].action = createAction(current.flokshell[key]);
+                    delete current.flokshell[key].dispatcher;
+                    delete current.flokshell[key].argument;
+                    delete current.flokshell[key].flags;
                     needsUpdate = true;
                 }
             }
@@ -1265,15 +1265,15 @@ Singleton {
             // Check system binds
             const systemKeys = ["overview", "powermenu", "config", "lockscreen", "tools", "screenshot", "screenrecord", "lens", "reload", "quit"];
             for (const key of systemKeys) {
-                if (!current.ambxst.system[key] && adapter.ambxst.system && adapter.ambxst.system[key]) {
+                if (!current.flokshell.system[key] && adapter.flokshell.system && adapter.flokshell.system[key]) {
                     console.log("Adding missing system bind:", key);
-                    current.ambxst.system[key] = createCleanBind(adapter.ambxst.system[key]);
+                    current.flokshell.system[key] = createCleanBind(adapter.flokshell.system[key]);
                     needsUpdate = true;
-                } else if (current.ambxst.system[key] && !current.ambxst.system[key].action) {
-                    current.ambxst.system[key].action = createAction(current.ambxst.system[key]);
-                    delete current.ambxst.system[key].dispatcher;
-                    delete current.ambxst.system[key].argument;
-                    delete current.ambxst.system[key].flags;
+                } else if (current.flokshell.system[key] && !current.flokshell.system[key].action) {
+                    current.flokshell.system[key].action = createAction(current.flokshell.system[key]);
+                    delete current.flokshell.system[key].dispatcher;
+                    delete current.flokshell.system[key].argument;
+                    delete current.flokshell.system[key].flags;
                     needsUpdate = true;
                 }
             }
@@ -1348,48 +1348,48 @@ Singleton {
         }
 
         adapter: JsonAdapter {
-            property JsonObject ambxst: JsonObject {
+            property JsonObject flokshell: JsonObject {
                 property JsonObject launcher: JsonObject {
                     property list<string> modifiers: ["SUPER"]
                     property string key: "Super_L"
-                property var action: ({ "id": "ambxst.launcher", "args": {} })
+                property var action: ({ "id": "flokshell.launcher", "args": {} })
             }
             property JsonObject dashboard: JsonObject {
                 property list<string> modifiers: ["SUPER"]
                 property string key: "D"
-                property var action: ({ "id": "ambxst.dashboard", "args": {} })
+                property var action: ({ "id": "flokshell.dashboard", "args": {} })
             }
 
             property JsonObject clipboard: JsonObject {
                 property list<string> modifiers: ["SUPER"]
                 property string key: "V"
-                property var action: ({ "id": "ambxst.clipboard", "args": {} })
+                property var action: ({ "id": "flokshell.clipboard", "args": {} })
             }
             property JsonObject emoji: JsonObject {
                 property list<string> modifiers: ["SUPER"]
                 property string key: "PERIOD"
-                property var action: ({ "id": "ambxst.emoji", "args": {} })
+                property var action: ({ "id": "flokshell.emoji", "args": {} })
             }
             property JsonObject notes: JsonObject {
                 property list<string> modifiers: ["SUPER"]
                 property string key: "N"
-                property var action: ({ "id": "ambxst.notes", "args": {} })
+                property var action: ({ "id": "flokshell.notes", "args": {} })
             }
             property JsonObject tmux: JsonObject {
                 property list<string> modifiers: ["SUPER"]
                 property string key: "T"
-                property var action: ({ "id": "ambxst.tmux", "args": {} })
+                property var action: ({ "id": "flokshell.tmux", "args": {} })
             }
             property JsonObject wallpapers: JsonObject {
                 property list<string> modifiers: ["SUPER"]
                 property string key: "COMMA"
-                property var action: ({ "id": "ambxst.wallpapers", "args": {} })
+                property var action: ({ "id": "flokshell.wallpapers", "args": {} })
             }
             property JsonObject system: JsonObject {
                 property JsonObject config: JsonObject {
                     property list<string> modifiers: ["SUPER", "SHIFT"]
                     property string key: "C"
-                    property var action: ({ "id": "ambxst.config", "args": {} })
+                    property var action: ({ "id": "flokshell.config", "args": {} })
                 }
                 property JsonObject lockscreen: JsonObject {
                     property list<string> modifiers: ["SUPER"]
@@ -1399,73 +1399,73 @@ Singleton {
                 property JsonObject overview: JsonObject {
                     property list<string> modifiers: ["SUPER"]
                     property string key: "TAB"
-                    property var action: ({ "id": "ambxst.overview", "args": {} })
+                    property var action: ({ "id": "flokshell.overview", "args": {} })
                 }
                 property JsonObject powermenu: JsonObject {
                     property list<string> modifiers: ["SUPER"]
                     property string key: "ESCAPE"
-                    property var action: ({ "id": "ambxst.powermenu", "args": {} })
+                    property var action: ({ "id": "flokshell.powermenu", "args": {} })
                 }
                 property JsonObject tools: JsonObject {
                     property list<string> modifiers: ["SUPER"]
                     property string key: "S"
-                    property var action: ({ "id": "ambxst.tools", "args": {} })
+                    property var action: ({ "id": "flokshell.tools", "args": {} })
                 }
                 property JsonObject screenshot: JsonObject {
                     property list<string> modifiers: ["SUPER", "SHIFT"]
                     property string key: "S"
-                    property var action: ({ "id": "ambxst.screenshot", "args": {} })
+                    property var action: ({ "id": "flokshell.screenshot", "args": {} })
                 }
                 property JsonObject screenrecord: JsonObject {
                     property list<string> modifiers: ["SUPER", "SHIFT"]
                     property string key: "R"
-                    property var action: ({ "id": "ambxst.screenrecord", "args": {} })
+                    property var action: ({ "id": "flokshell.screenrecord", "args": {} })
                 }
                 property JsonObject lens: JsonObject {
                     property list<string> modifiers: ["SUPER", "SHIFT"]
                     property string key: "A"
-                    property var action: ({ "id": "ambxst.lens", "args": {} })
+                    property var action: ({ "id": "flokshell.lens", "args": {} })
                 }
                 property JsonObject reload: JsonObject {
                     property list<string> modifiers: ["SUPER", "ALT"]
                     property string key: "B"
-                    property var action: ({ "id": "ambxst.reload", "args": {} })
+                    property var action: ({ "id": "flokshell.reload", "args": {} })
                 }
                 property JsonObject quit: JsonObject {
                     property list<string> modifiers: ["SUPER", "CTRL", "ALT"]
                     property string key: "B"
-                    property var action: ({ "id": "ambxst.quit", "args": {} })
+                    property var action: ({ "id": "flokshell.quit", "args": {} })
                 }
             }
             }
             // Default getters
-            readonly property var defaultAmbxstBinds: {
-                "ambxst": {
-                    "launcher": { "modifiers": ["SUPER"], "key": "Super_L", "action": { "id": "ambxst.launcher", "args": {} } },
-                    "dashboard": { "modifiers": ["SUPER"], "key": "D", "action": { "id": "ambxst.dashboard", "args": {} } },
-                    "clipboard": { "modifiers": ["SUPER"], "key": "V", "action": { "id": "ambxst.clipboard", "args": {} } },
-                    "emoji": { "modifiers": ["SUPER"], "key": "PERIOD", "action": { "id": "ambxst.emoji", "args": {} } },
-                    "notes": { "modifiers": ["SUPER"], "key": "N", "action": { "id": "ambxst.notes", "args": {} } },
-                    "tmux": { "modifiers": ["SUPER"], "key": "T", "action": { "id": "ambxst.tmux", "args": {} } },
-                    "wallpapers": { "modifiers": ["SUPER"], "key": "COMMA", "action": { "id": "ambxst.wallpapers", "args": {} } }
+            readonly property var defaultFlokshellBinds: {
+                "flokshell": {
+                    "launcher": { "modifiers": ["SUPER"], "key": "Super_L", "action": { "id": "flokshell.launcher", "args": {} } },
+                    "dashboard": { "modifiers": ["SUPER"], "key": "D", "action": { "id": "flokshell.dashboard", "args": {} } },
+                    "clipboard": { "modifiers": ["SUPER"], "key": "V", "action": { "id": "flokshell.clipboard", "args": {} } },
+                    "emoji": { "modifiers": ["SUPER"], "key": "PERIOD", "action": { "id": "flokshell.emoji", "args": {} } },
+                    "notes": { "modifiers": ["SUPER"], "key": "N", "action": { "id": "flokshell.notes", "args": {} } },
+                    "tmux": { "modifiers": ["SUPER"], "key": "T", "action": { "id": "flokshell.tmux", "args": {} } },
+                    "wallpapers": { "modifiers": ["SUPER"], "key": "COMMA", "action": { "id": "flokshell.wallpapers", "args": {} } }
                 },
                 "system": {
-                    "config": { "modifiers": ["SUPER", "SHIFT"], "key": "C", "action": { "id": "ambxst.config", "args": {} } },
+                    "config": { "modifiers": ["SUPER", "SHIFT"], "key": "C", "action": { "id": "flokshell.config", "args": {} } },
                     "lockscreen": { "modifiers": ["SUPER"], "key": "L", "action": { "id": "system.lock", "args": {} } },
-                    "overview": { "modifiers": ["SUPER"], "key": "TAB", "action": { "id": "ambxst.overview", "args": {} } },
-                    "powermenu": { "modifiers": ["SUPER"], "key": "ESCAPE", "action": { "id": "ambxst.powermenu", "args": {} } },
-                    "tools": { "modifiers": ["SUPER"], "key": "S", "action": { "id": "ambxst.tools", "args": {} } },
-                    "screenshot": { "modifiers": ["SUPER", "SHIFT"], "key": "S", "action": { "id": "ambxst.screenshot", "args": {} } },
-                    "screenrecord": { "modifiers": ["SUPER", "SHIFT"], "key": "R", "action": { "id": "ambxst.screenrecord", "args": {} } },
-                    "lens": { "modifiers": ["SUPER", "SHIFT"], "key": "A", "action": { "id": "ambxst.lens", "args": {} } },
-                    "reload": { "modifiers": ["SUPER", "ALT"], "key": "B", "action": { "id": "ambxst.reload", "args": {} } },
-                    "quit": { "modifiers": ["SUPER", "CTRL", "ALT"], "key": "B", "action": { "id": "ambxst.quit", "args": {} } }
+                    "overview": { "modifiers": ["SUPER"], "key": "TAB", "action": { "id": "flokshell.overview", "args": {} } },
+                    "powermenu": { "modifiers": ["SUPER"], "key": "ESCAPE", "action": { "id": "flokshell.powermenu", "args": {} } },
+                    "tools": { "modifiers": ["SUPER"], "key": "S", "action": { "id": "flokshell.tools", "args": {} } },
+                    "screenshot": { "modifiers": ["SUPER", "SHIFT"], "key": "S", "action": { "id": "flokshell.screenshot", "args": {} } },
+                    "screenrecord": { "modifiers": ["SUPER", "SHIFT"], "key": "R", "action": { "id": "flokshell.screenrecord", "args": {} } },
+                    "lens": { "modifiers": ["SUPER", "SHIFT"], "key": "A", "action": { "id": "flokshell.lens", "args": {} } },
+                    "reload": { "modifiers": ["SUPER", "ALT"], "key": "B", "action": { "id": "flokshell.reload", "args": {} } },
+                    "quit": { "modifiers": ["SUPER", "CTRL", "ALT"], "key": "B", "action": { "id": "flokshell.quit", "args": {} } }
                 }
             }
 
-            function getAmbxstDefault(section, key) {
-                if (defaultAmbxstBinds[section] && defaultAmbxstBinds[section][key]) {
-                    const bind = defaultAmbxstBinds[section][key];
+            function getFlokshellDefault(section, key) {
+                if (defaultFlokshellBinds[section] && defaultFlokshellBinds[section][key]) {
+                    const bind = defaultFlokshellBinds[section][key];
                     return {
                         "modifiers": bind.modifiers || [],
                         "key": bind.key || "",
@@ -2333,7 +2333,7 @@ Singleton {
                     "actions": [
                         {
                             "dispatcher": "exec",
-                            "argument": "ambxst brightness +5",
+                            "argument": "flok brightness +5",
                             "flags": "le",
                             "layouts": []
                         }
@@ -2351,7 +2351,7 @@ Singleton {
                     "actions": [
                         {
                             "dispatcher": "exec",
-                            "argument": "ambxst brightness -5",
+                            "argument": "flok brightness -5",
                             "flags": "le",
                             "layouts": []
                         }

@@ -76,7 +76,7 @@ Item {
         }
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-        WlrLayershell.namespace: "ambxst:screenFrame:top"
+        WlrLayershell.namespace: "flokshell:screenFrame:top"
 
         // Always Normal mode, control zone size directly
         exclusionMode: (root.containBar && root.barPos === "top" && !root.hasFullscreenWindow) ? ExclusionMode.Normal : ExclusionMode.Ignore
@@ -101,7 +101,7 @@ Item {
         }
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-        WlrLayershell.namespace: "ambxst:screenFrame:bottom"
+        WlrLayershell.namespace: "flokshell:screenFrame:bottom"
 
         exclusionMode: (root.containBar && root.barPos === "bottom" && !root.hasFullscreenWindow) ? ExclusionMode.Normal : ExclusionMode.Ignore
         exclusiveZone: (root.containBar && root.barPos === "bottom" && !root.hasFullscreenWindow) ? root.bottomThickness : 0
@@ -125,7 +125,7 @@ Item {
         }
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-        WlrLayershell.namespace: "ambxst:screenFrame:left"
+        WlrLayershell.namespace: "flokshell:screenFrame:left"
 
         // The reservation handles the full width (thickness + bar + sidebar)
         exclusionMode: (!root.hasFullscreenWindow && ((root.containBar && root.barPos === "left") || (root.sidebarPosition === "left" && root.sidebarPinned))) ? ExclusionMode.Normal : ExclusionMode.Ignore
@@ -150,7 +150,7 @@ Item {
         }
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-        WlrLayershell.namespace: "ambxst:screenFrame:right"
+        WlrLayershell.namespace: "flokshell:screenFrame:right"
 
         exclusionMode: (!root.hasFullscreenWindow && ((root.containBar && root.barPos === "right") || (root.sidebarPosition === "right" && root.sidebarPinned))) ? ExclusionMode.Normal : ExclusionMode.Ignore
         exclusiveZone: (!root.hasFullscreenWindow && ((root.containBar && root.barPos === "right") || (root.sidebarPosition === "right" && root.sidebarPinned))) ? root.rightThickness : 0
@@ -173,7 +173,7 @@ Item {
         }
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-        WlrLayershell.namespace: "ambxst:screenFrame:overlay"
+        WlrLayershell.namespace: "flokshell:screenFrame:overlay"
         exclusionMode: ExclusionMode.Ignore
         exclusiveZone: 0
         mask: Region {

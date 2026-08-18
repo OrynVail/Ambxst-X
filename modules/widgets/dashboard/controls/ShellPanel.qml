@@ -1533,9 +1533,9 @@ Item {
                         }
 
                         ActionButton {
-                            text: "About Ambxst " + Config.version
+                            text: "About Flokshell " + Config.version
                             icon: Icons.info
-                            onClicked: Quickshell.execDetached(["xdg-open", "https://axeni.de/ambxst"])
+                            onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/OrynVail/flokshell"])
                         }
 
                         ActionButton {

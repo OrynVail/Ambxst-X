@@ -9,7 +9,7 @@ QtObject {
 
     property Process compositorProcess: Process {}
 
-    property var previousAmbxstBinds: ({})
+    property var previousFlokshellBinds: ({})
     property var previousCustomBinds: []
     property bool hasPreviousBinds: false
 
@@ -45,30 +45,30 @@ QtObject {
         if (!Config.keybindsLoader.loaded)
             return;
 
-        const ambxst = Config.keybindsLoader.adapter.ambxst;
+        const flokshell = Config.keybindsLoader.adapter.flokshell;
 
-        // Store ambxst core keybinds
-        previousAmbxstBinds = {
-            ambxst: {
-                launcher: cloneKeybind(ambxst.launcher),
-                dashboard: cloneKeybind(ambxst.dashboard),
-                clipboard: cloneKeybind(ambxst.clipboard),
-                emoji: cloneKeybind(ambxst.emoji),
-                notes: cloneKeybind(ambxst.notes),
-                tmux: cloneKeybind(ambxst.tmux),
-                wallpapers: cloneKeybind(ambxst.wallpapers)
+        // Store flokshell core keybinds
+        previousFlokshellBinds = {
+            flokshell: {
+                launcher: cloneKeybind(flokshell.launcher),
+                dashboard: cloneKeybind(flokshell.dashboard),
+                clipboard: cloneKeybind(flokshell.clipboard),
+                emoji: cloneKeybind(flokshell.emoji),
+                notes: cloneKeybind(flokshell.notes),
+                tmux: cloneKeybind(flokshell.tmux),
+                wallpapers: cloneKeybind(flokshell.wallpapers)
             },
             system: {
-                overview: cloneKeybind(ambxst.system.overview),
-                powermenu: cloneKeybind(ambxst.system.powermenu),
-                config: cloneKeybind(ambxst.system.config),
-                lockscreen: cloneKeybind(ambxst.system.lockscreen),
-                tools: cloneKeybind(ambxst.system.tools),
-                screenshot: cloneKeybind(ambxst.system.screenshot),
-                screenrecord: cloneKeybind(ambxst.system.screenrecord),
-                lens: cloneKeybind(ambxst.system.lens),
-                reload: ambxst.system.reload ? cloneKeybind(ambxst.system.reload) : null,
-                quit: ambxst.system.quit ? cloneKeybind(ambxst.system.quit) : null
+                overview: cloneKeybind(flokshell.system.overview),
+                powermenu: cloneKeybind(flokshell.system.powermenu),
+                config: cloneKeybind(flokshell.system.config),
+                lockscreen: cloneKeybind(flokshell.system.lockscreen),
+                tools: cloneKeybind(flokshell.system.tools),
+                screenshot: cloneKeybind(flokshell.system.screenshot),
+                screenrecord: cloneKeybind(flokshell.system.screenrecord),
+                lens: cloneKeybind(flokshell.system.lens),
+                reload: flokshell.system.reload ? cloneKeybind(flokshell.system.reload) : null,
+                quit: flokshell.system.quit ? cloneKeybind(flokshell.system.quit) : null
             }
         };
 
@@ -161,29 +161,29 @@ QtObject {
 
         // First, unbind previous keybinds if we have them stored
         if (hasPreviousBinds) {
-            // Unbind previous ambxst core keybinds
-            if (previousAmbxstBinds.ambxst) {
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.ambxst.launcher));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.ambxst.dashboard));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.ambxst.clipboard));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.ambxst.emoji));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.ambxst.notes));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.ambxst.tmux));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.ambxst.wallpapers));
+            // Unbind previous flokshell core keybinds
+            if (previousFlokshellBinds.flokshell) {
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.flokshell.launcher));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.flokshell.dashboard));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.flokshell.clipboard));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.flokshell.emoji));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.flokshell.notes));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.flokshell.tmux));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.flokshell.wallpapers));
             }
 
-            // Unbind previous ambxst system keybinds
-            if (previousAmbxstBinds.system) {
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.overview));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.powermenu));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.config));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.lockscreen));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.tools));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.screenshot));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.screenrecord));
-                payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.lens));
-                if (previousAmbxstBinds.system.reload) payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.reload));
-                if (previousAmbxstBinds.system.quit) payload.unbinds.push(makeUnbindTarget(previousAmbxstBinds.system.quit));
+            // Unbind previous flokshell system keybinds
+            if (previousFlokshellBinds.system) {
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.overview));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.powermenu));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.config));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.lockscreen));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.tools));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.screenshot));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.screenrecord));
+                payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.lens));
+                if (previousFlokshellBinds.system.reload) payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.reload));
+                if (previousFlokshellBinds.system.quit) payload.unbinds.push(makeUnbindTarget(previousFlokshellBinds.system.quit));
             }
 
             // Unbind previous custom keybinds
@@ -200,25 +200,25 @@ QtObject {
         }
 
         // Process core keybinds.
-        const ambxst = Config.keybindsLoader.adapter.ambxst;
+        const flokshell = Config.keybindsLoader.adapter.flokshell;
 
         // Unbind current core keybinds (ensures clean state before rebinding)
-        payload.unbinds.push(makeUnbindTarget(ambxst.launcher));
-        payload.unbinds.push(makeUnbindTarget(ambxst.dashboard));
-        payload.unbinds.push(makeUnbindTarget(ambxst.clipboard));
-        payload.unbinds.push(makeUnbindTarget(ambxst.emoji));
-        payload.unbinds.push(makeUnbindTarget(ambxst.notes));
-        payload.unbinds.push(makeUnbindTarget(ambxst.tmux));
-        payload.unbinds.push(makeUnbindTarget(ambxst.wallpapers));
+        payload.unbinds.push(makeUnbindTarget(flokshell.launcher));
+        payload.unbinds.push(makeUnbindTarget(flokshell.dashboard));
+        payload.unbinds.push(makeUnbindTarget(flokshell.clipboard));
+        payload.unbinds.push(makeUnbindTarget(flokshell.emoji));
+        payload.unbinds.push(makeUnbindTarget(flokshell.notes));
+        payload.unbinds.push(makeUnbindTarget(flokshell.tmux));
+        payload.unbinds.push(makeUnbindTarget(flokshell.wallpapers));
 
         // Bind current core keybinds
-        [ambxst.launcher, ambxst.dashboard, ambxst.clipboard, ambxst.emoji, ambxst.notes, ambxst.tmux, ambxst.wallpapers].forEach(bind => {
+        [flokshell.launcher, flokshell.dashboard, flokshell.clipboard, flokshell.emoji, flokshell.notes, flokshell.tmux, flokshell.wallpapers].forEach(bind => {
             const resolved = makeBindFromCore(bind);
             if (resolved) payload.binds.push(resolved);
         });
 
         // System keybinds
-        const system = ambxst.system;
+        const system = flokshell.system;
 
         // Unbind current system keybinds
         payload.unbinds.push(makeUnbindTarget(system.overview));

@@ -1,21 +1,21 @@
-# NixOS module for Ambxst
+# NixOS module for Flokshell
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.programs.ambxst;
+  cfg = config.programs.flokshell;
 in {
-  options.programs.ambxst = {
-    enable = lib.mkEnableOption "Ambxst shell";
+  options.programs.flokshell = {
+    enable = lib.mkEnableOption "Flokshell shell";
 
     package = lib.mkOption {
       type = lib.types.package;
-      description = "The Ambxst package to use";
+      description = "The Flokshell package to use";
     };
 
     fonts.enable = lib.mkOption {
       type = lib.types.bool;
       default = true;
-      description = "Whether to install Ambxst fonts (including Phosphor Icons)";
+      description = "Whether to install Flokshell fonts (including Phosphor Icons)";
     };
   };
 

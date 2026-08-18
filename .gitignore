@@ -1,4 +1,29 @@
+# Tooling
 .qmlls.ini
 .ruff_cache/
-scripts/__pycache__
+__pycache__/
 .sisyphus
+.claude/
+
+# Nix
+.direnv/
+result
+result-*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Scratch in the repo root — grim and wf-recorder write here while testing
+/*.png
+/*.jpg
+/*.jpeg
+/*.mp4
+/*.gif
+/*.webm
+/*.log
+
+# Private
+/flokshell.md

@@ -1,5 +1,5 @@
 {
-  description = "Ambxst - An Axtremely customizable shell by Axenide";
+  description = "flokshell - a Wayland shell for Hyprland, forked from Ambxst";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -12,16 +12,16 @@
 
   outputs = { self, nixpkgs, axctl, ... }:
     let
-      ambxstLib = import ./nix/lib.nix { inherit nixpkgs; };
+      flokshellLib = import ./nix/lib.nix { inherit nixpkgs; };
       version = nixpkgs.lib.removeSuffix "\n" (builtins.readFile ./version);
     in {
       nixosModules.default = { pkgs, lib, ... }: {
         imports = [ ./nix/modules ];
-        programs.ambxst.enable = lib.mkDefault true;
-        programs.ambxst.package = lib.mkDefault self.packages.${pkgs.system}.default;
+        programs.flokshell.enable = lib.mkDefault true;
+        programs.flokshell.package = lib.mkDefault self.packages.${pkgs.system}.default;
       };
 
-      packages = ambxstLib.forAllSystems (system:
+      packages = flokshellLib.forAllSystems (system:
         let
           pkgs = import nixpkgs {
             inherit system;
@@ -30,38 +30,38 @@
 
           lib = nixpkgs.lib;
 
-          Ambxst = import ./nix/packages {
+          Flokshell = import ./nix/packages {
             inherit pkgs lib self system axctl version;
           };
         in {
-          default = Ambxst;
-          Ambxst = Ambxst;
+          default = Flokshell;
+          Flokshell = Flokshell;
         }
       );
 
-      devShells = ambxstLib.forAllSystems (system:
+      devShells = flokshellLib.forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };
-          Ambxst = self.packages.${system}.default;
+          Flokshell = self.packages.${system}.default;
         in {
           default = pkgs.mkShell {
-            packages = [ Ambxst ];
+            packages = [ Flokshell ];
             shellHook = ''
-              export QML2_IMPORT_PATH="${Ambxst}/lib/qt-6/qml:$QML2_IMPORT_PATH"
+              export QML2_IMPORT_PATH="${Flokshell}/lib/qt-6/qml:$QML2_IMPORT_PATH"
               export QML_IMPORT_PATH="$QML2_IMPORT_PATH"
-              echo "Ambxst dev environment loaded."
+              echo "Flokshell dev environment loaded."
             '';
           };
         }
       );
 
-      apps = ambxstLib.forAllSystems (system:
+      apps = flokshellLib.forAllSystems (system:
         let
-          Ambxst = self.packages.${system}.default;
+          Flokshell = self.packages.${system}.default;
         in {
           default = {
             type = "app";
-            program = "${Ambxst}/bin/ambxst";
+            program = "${Flokshell}/bin/flok";
           };
         }
       );

@@ -1,7 +1,7 @@
 # CONFIG KNOWLEDGE BASE
 
 ## OVERVIEW
-Reactive, file-backed configuration system built on `Quickshell.Io`. Source of truth for all shell modules. Stores JSON in `~/.config/ambxst/config/`. Gracefully handles missing/malformed files by falling back to hardcoded defaults.
+Reactive, file-backed configuration system built on `Quickshell.Io`. Source of truth for all shell modules. Stores JSON in `~/.config/flokshell/config/`. Gracefully handles missing/malformed files by falling back to hardcoded defaults.
 
 ## STRUCTURE
 - **Config.qml**: Core singleton (3469 lines). `FileView` monitors disk; `JsonAdapter` creates bidirectional QML bindings. Each domain has its own `FileView`/`JsonAdapter` pair.

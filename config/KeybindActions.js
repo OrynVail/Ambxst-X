@@ -29,22 +29,22 @@ function directionToLetter(direction) {
 }
 
 var ACTION_CATALOG = [
-    { id: "ambxst.launcher", label: "Open Launcher", category: "Ambxst", dispatcher: "exec", argument: "ambxst run launcher", flags: "r" },
-    { id: "ambxst.dashboard", label: "Open Dashboard", category: "Ambxst", dispatcher: "exec", argument: "ambxst run dashboard" },
-    { id: "ambxst.clipboard", label: "Open Clipboard", category: "Ambxst", dispatcher: "exec", argument: "ambxst run clipboard" },
-    { id: "ambxst.emoji", label: "Open Emoji", category: "Ambxst", dispatcher: "exec", argument: "ambxst run emoji" },
-    { id: "ambxst.notes", label: "Open Notes", category: "Ambxst", dispatcher: "exec", argument: "ambxst run notes" },
-    { id: "ambxst.tmux", label: "Open Tmux", category: "Ambxst", dispatcher: "exec", argument: "ambxst run tmux" },
-    { id: "ambxst.wallpapers", label: "Open Wallpapers", category: "Ambxst", dispatcher: "exec", argument: "ambxst run wallpapers" },
-    { id: "ambxst.config", label: "Open Settings", category: "Ambxst", dispatcher: "exec", argument: "ambxst run config" },
-    { id: "ambxst.overview", label: "Open Overview", category: "Ambxst", dispatcher: "exec", argument: "ambxst run overview" },
-    { id: "ambxst.powermenu", label: "Open Power Menu", category: "Ambxst", dispatcher: "exec", argument: "ambxst run powermenu" },
-    { id: "ambxst.tools", label: "Open Tools", category: "Ambxst", dispatcher: "exec", argument: "ambxst run tools" },
-    { id: "ambxst.screenshot", label: "Take Screenshot", category: "Ambxst", dispatcher: "exec", argument: "ambxst run screenshot" },
-    { id: "ambxst.screenrecord", label: "Screen Record", category: "Ambxst", dispatcher: "exec", argument: "ambxst run screenrecord" },
-    { id: "ambxst.lens", label: "Open Lens", category: "Ambxst", dispatcher: "exec", argument: "ambxst run lens" },
-    { id: "ambxst.reload", label: "Reload Ambxst", category: "Ambxst", dispatcher: "exec", argument: "ambxst reload" },
-    { id: "ambxst.quit", label: "Quit Ambxst", category: "Ambxst", dispatcher: "exec", argument: "ambxst quit" },
+    { id: "flokshell.launcher", label: "Open Launcher", category: "Flokshell", dispatcher: "exec", argument: "flok run launcher", flags: "r" },
+    { id: "flokshell.dashboard", label: "Open Dashboard", category: "Flokshell", dispatcher: "exec", argument: "flok run dashboard" },
+    { id: "flokshell.clipboard", label: "Open Clipboard", category: "Flokshell", dispatcher: "exec", argument: "flok run clipboard" },
+    { id: "flokshell.emoji", label: "Open Emoji", category: "Flokshell", dispatcher: "exec", argument: "flok run emoji" },
+    { id: "flokshell.notes", label: "Open Notes", category: "Flokshell", dispatcher: "exec", argument: "flok run notes" },
+    { id: "flokshell.tmux", label: "Open Tmux", category: "Flokshell", dispatcher: "exec", argument: "flok run tmux" },
+    { id: "flokshell.wallpapers", label: "Open Wallpapers", category: "Flokshell", dispatcher: "exec", argument: "flok run wallpapers" },
+    { id: "flokshell.config", label: "Open Settings", category: "Flokshell", dispatcher: "exec", argument: "flok run config" },
+    { id: "flokshell.overview", label: "Open Overview", category: "Flokshell", dispatcher: "exec", argument: "flok run overview" },
+    { id: "flokshell.powermenu", label: "Open Power Menu", category: "Flokshell", dispatcher: "exec", argument: "flok run powermenu" },
+    { id: "flokshell.tools", label: "Open Tools", category: "Flokshell", dispatcher: "exec", argument: "flok run tools" },
+    { id: "flokshell.screenshot", label: "Take Screenshot", category: "Flokshell", dispatcher: "exec", argument: "flok run screenshot" },
+    { id: "flokshell.screenrecord", label: "Screen Record", category: "Flokshell", dispatcher: "exec", argument: "flok run screenrecord" },
+    { id: "flokshell.lens", label: "Open Lens", category: "Flokshell", dispatcher: "exec", argument: "flok run lens" },
+    { id: "flokshell.reload", label: "Reload Flokshell", category: "Flokshell", dispatcher: "exec", argument: "flok reload" },
+    { id: "flokshell.quit", label: "Quit Flokshell", category: "Flokshell", dispatcher: "exec", argument: "flok quit" },
 
     { id: "window.close", label: "Close Window", category: "Window", dispatcher: "killactive", argument: "" },
     { id: "window.focus", label: "Focus Window", category: "Window", dispatcher: "movefocus", args: [{ key: "direction", label: "Direction", placeholder: "up/down/left/right", defaultValue: "up" }], argumentBuilder: function (args) {
@@ -108,8 +108,8 @@ var ACTION_CATALOG = [
     { id: "audio.volume-down", label: "Volume Down", category: "Audio", dispatcher: "exec", argument: "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 10%-", flags: "le" },
     { id: "audio.mute-toggle", label: "Mute Audio", category: "Audio", dispatcher: "exec", argument: "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle", flags: "le" },
 
-    { id: "brightness.up", label: "Brightness Up", category: "Brightness", dispatcher: "exec", argument: "ambxst brightness +5", flags: "le" },
-    { id: "brightness.down", label: "Brightness Down", category: "Brightness", dispatcher: "exec", argument: "ambxst brightness -5", flags: "le" },
+    { id: "brightness.up", label: "Brightness Up", category: "Brightness", dispatcher: "exec", argument: "flok brightness +5", flags: "le" },
+    { id: "brightness.down", label: "Brightness Down", category: "Brightness", dispatcher: "exec", argument: "flok brightness -5", flags: "le" },
 
     { id: "system.calculator", label: "Calculator", category: "System", dispatcher: "exec", argument: "notify-send \"Soon\"" },
     { id: "system.lock", label: "Lock Session", category: "System", dispatcher: "exec", argument: "loginctl lock-session" },
@@ -277,8 +277,8 @@ function actionFromLegacy(dispatcher, argument, flags) {
         if (arg.indexOf("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 10%+") === 0) return { id: "audio.volume-up", args: {} };
         if (arg.indexOf("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 10%-") === 0) return { id: "audio.volume-down", args: {} };
         if (arg.indexOf("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") === 0) return { id: "audio.mute-toggle", args: {} };
-        if (arg.indexOf("ambxst brightness +5") === 0) return { id: "brightness.up", args: {} };
-        if (arg.indexOf("ambxst brightness -5") === 0) return { id: "brightness.down", args: {} };
+        if (arg.indexOf("flok brightness +5") === 0) return { id: "brightness.up", args: {} };
+        if (arg.indexOf("flok brightness -5") === 0) return { id: "brightness.down", args: {} };
         if (arg === "notify-send \"Soon\"") return { id: "system.calculator", args: {} };
         if (arg === "loginctl lock-session" && flags === "l") return { id: "system.lock-locked", args: {} };
         if (arg === "loginctl lock-session") return { id: "system.lock", args: {} };

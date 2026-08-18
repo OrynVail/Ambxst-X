@@ -19,7 +19,7 @@ Quickshell hot-reloads on file save, so edits apply without a restart. Reloading
 
 For a full restart, the socket must be cleared or the shell comes up crippled:
 ```bash
-pkill -f 'quickshell -p .*Ambxst-X'; pkill -x axctl
+pkill -f 'quickshell -p .*flokshell'; pkill -x axctl
 rm -f /tmp/axctl-1000.sock
 ./cli.sh
 ```
@@ -30,7 +30,7 @@ you want both a `daemon` and a `subscribe`.
 
 Driving it without touching the UI:
 ```bash
-echo dashboard > /tmp/ambxst_ipc.pipe    # toggles; see GlobalShortcuts.run()
+echo dashboard > /tmp/flokshell_ipc.pipe    # toggles; see GlobalShortcuts.run()
 grim -o <output> shot.png                # multi-monitor: pass the output name
 ```
 
@@ -71,7 +71,7 @@ widgets live on inside the notch and everything imports `qs.modules.bar.*`.
 | Entry point | `shell.qml` |
 | Config logic | `config/Config.qml` (3469 lines) |
 | Transient state | `modules/globals/GlobalStates.qml` |
-| Theme / colours | `modules/theme/Colors.qml`, watches `~/.cache/ambxst/colors.json` |
+| Theme / colours | `modules/theme/Colors.qml`, watches `~/.cache/flokshell/colors.json` |
 | Layout tokens | `modules/theme/Styling.qml` — `control`, `glyph`, `gutter`, `tight` |
 | UI primitives | `modules/components/StyledRect.qml` |
 | Notch | `modules/notch/Notch.qml`, idle content in `modules/widgets/defaultview/` |

@@ -5,14 +5,14 @@ import qs.modules.services
 import qs.config
 
 // Centrepiece of the notch row: the shell logo. Falls back to the bundled
-// ambxst mark when no custom icon is set. Tint options let it follow the
+// floki mark when no custom icon is set. Tint options let it follow the
 // generated colour scheme instead of shipping as a fixed-colour image.
 ToggleButton {
     id: root
 
     readonly property int logoSize: Config.notch?.logoSize ?? 23
 
-    buttonIcon: (Config.notch?.logoIcon || "") !== "" ? Config.notch.logoIcon : Qt.resolvedUrl("../../../assets/ambxst/ambxst-icon.svg").toString().replace("file://", "")
+    buttonIcon: (Config.notch?.logoIcon || "") !== "" ? Config.notch.logoIcon : Qt.resolvedUrl("../../../assets/floki/floki-bolt.svg").toString().replace("file://", "")
     iconTint: Config.notch?.logoTint ?? false
     iconFullTint: Config.notch?.logoFullTint ?? false
     iconSize: logoSize

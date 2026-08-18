@@ -60,15 +60,7 @@ Button {
     }
 
 
-    // Rest brightness matched to the workspace pill; full strength on hover
-    opacity: root.flat ? ((root.hovered || root.pressed) ? 1.0 : 0.85) : 1.0
-    Behavior on opacity {
-        enabled: Config.animDuration > 0
-        NumberAnimation {
-            duration: Config.animDuration / 2
-            easing.type: Easing.OutCubic
-        }
-    }
+    opacity: 1.0
 
     // Flat buttons grow slightly on hover instead of filling a background.
     // scale is a render transform, so this never reflows the row.

@@ -1,7 +1,7 @@
 //@ pragma UseQApplication
-//@ pragma ShellId ambxst
-//@ pragma DataDir $BASE/ambxst
-//@ pragma StateDir $BASE/ambxst
+//@ pragma ShellId flokshell
+//@ pragma DataDir $BASE/flokshell
+//@ pragma StateDir $BASE/flokshell
 
 import QtQuick
 import Quickshell

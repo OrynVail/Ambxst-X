@@ -1,4 +1,4 @@
-# Main Ambxst package
+# Main Flokshell package
 { pkgs, lib, self, system, axctl, version }:
 
 let
@@ -25,23 +25,23 @@ let
     ++ fontsPkgs
     ++ tesseractPkgs;
 
-  envAmbxst = pkgs.buildEnv {
-    name = "Ambxst-env";
+  envFlokshell = pkgs.buildEnv {
+    name = "Flokshell-env";
     paths = baseEnv;
   };
 
   # Create fontconfig configuration to find bundled fonts
-  fontconfigConf = pkgs.writeTextDir "etc/fonts/conf.d/99-ambxst-fonts.conf" ''
+  fontconfigConf = pkgs.writeTextDir "etc/fonts/conf.d/99-flokshell-fonts.conf" ''
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
     <fontconfig>
-      <dir>${envAmbxst}/share/fonts</dir>
+      <dir>${envFlokshell}/share/fonts</dir>
     </fontconfig>
   '';
 
   # Copy shell sources to the Nix store
   shellSrc = pkgs.stdenv.mkDerivation {
-    pname = "ambxst-shell";
+    pname = "flokshell";
     inherit version;
     src = lib.cleanSource self;
     dontBuild = true;
@@ -51,12 +51,12 @@ let
     '';
   };
 
-  launcher = pkgs.writeShellScriptBin "ambxst" ''
-    export AMBXST_QS="${quickshellPkg}/bin/qs"
-    export PATH="${envAmbxst}/bin:$PATH"
+  launcher = pkgs.writeShellScriptBin "flok" ''
+    export FLOKSHELL_QS="${quickshellPkg}/bin/qs"
+    export PATH="${envFlokshell}/bin:$PATH"
 
-    # Set QML2_IMPORT_PATH to include modules from envAmbxst (like syntax-highlighting)
-    export QML2_IMPORT_PATH="${envAmbxst}/lib/qt-6/qml:$QML2_IMPORT_PATH"
+    # Set QML2_IMPORT_PATH to include modules from envFlokshell (like syntax-highlighting)
+    export QML2_IMPORT_PATH="${envFlokshell}/lib/qt-6/qml:$QML2_IMPORT_PATH"
     export QML_IMPORT_PATH="$QML2_IMPORT_PATH"
 
     # Make bundled fonts available to fontconfig
@@ -66,8 +66,14 @@ let
     exec ${shellSrc}/cli.sh "$@"
   '';
 
+  # Compat shim: the old command name, kept so existing keybinds keep working.
+  compat = pkgs.runCommand "flokshell-compat" { } ''
+    mkdir -p $out/bin
+    ln -s ${launcher}/bin/flok $out/bin/ambxst
+  '';
+
 in pkgs.buildEnv {
-  name = "Ambxst-${version}";
-  paths = [ envAmbxst launcher ];
-  meta.mainProgram = "ambxst";
+  name = "Flokshell-${version}";
+  paths = [ envFlokshell launcher compat ];
+  meta.mainProgram = "flok";
 }
