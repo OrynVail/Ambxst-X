@@ -16,9 +16,7 @@ StyledRect {
 
     property bool isHovered: mouseArea.containsMouse
 
-    // The cell stays 48 for hit area and rhythm; the chip that actually gets
-    // painted is smaller, so a row with most toggles on doesn't turn into a
-    // wall of discs. State is fill — the radius never changes.
+    // The cell is the hit area; the painted chip is smaller. State is fill.
     variant: "transparent"
 
     StyledRect {
@@ -44,9 +42,7 @@ StyledRect {
             color: chip.item
             opacity: root.isActive || root.isHovered ? 1.0 : 0.55
             font.family: Icons.font
-            // Proportional to the chip rather than the Styling.glyph token, so
-            // the glyph grows when the row is sized to a column instead of to
-            // the standard control
+            // Proportional to the chip, not Styling.glyph — the row is column-sized
             font.pixelSize: Math.round(chip.height * 0.55)
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter

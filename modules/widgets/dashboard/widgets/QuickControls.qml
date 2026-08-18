@@ -6,11 +6,9 @@ import qs.modules.services
 import qs.config
 import "../controls"
 
-// Toggle row that sits above the calendar.
-//
-// Only the button row participates in layout. The Wi-Fi/Bluetooth drawer hangs
-// below the row at an explicit size, so expanding it covers the calendar rather
-// than growing the column and shoving everything down.
+// Toggle row above the calendar. Only the button row takes part in layout;
+// the Wi-Fi/Bluetooth drawer hangs below it at a fixed size so expanding
+// covers the calendar instead of growing the column.
 Item {
     id: root
 
@@ -18,7 +16,7 @@ Item {
     property int buttonSize: 40
     property int spacing: 4
 
-    // Set by the caller so the drawer matches the column it hangs over
+    // Caller matches this to the column the drawer hangs over
     property int panelWidth: 300
 
     implicitWidth: buttonRow.implicitWidth

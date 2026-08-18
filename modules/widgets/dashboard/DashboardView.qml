@@ -4,19 +4,15 @@ import qs.modules.services
 import qs.modules.theme
 
 Item {
-    // Every dimension is derived, not chosen. Columns are as wide as their
-    // contents need: the media column fits the player disc, the calendar
-    // exactly seven day cells, and notifications takes the remainder.
+    // Every dimension is derived here, not chosen downstream.
     readonly property int mediaColumn: 216
-    // The calendar was grown to fill the body height; keeping its aspect meant
-    // widening it by the same 17%, and that width comes out of notifications so
-    // the player and the divider after it do not move.
+    // Calendar keeps its aspect; the extra width comes out of notifications so
+    // the player and its divider stay put
     readonly property int calendarColumn: 263
     readonly property int notificationColumn: 280
 
-    // The one hard number every column is measured against: FullPlayer's own
-    // implicitHeight of 400, less 10%. The card centres content that runs to
-    // roughly 290, so it still has clearance and is never the thing squeezed.
+    // The one hard number. FullPlayer's implicitHeight of 400, trimmed; its
+    // content runs to ~290 so the player is never what gets squeezed.
     readonly property int bodyHeight: 340
 
     // gutter + separator + gutter between each pair of columns

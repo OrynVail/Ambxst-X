@@ -28,4 +28,4 @@ Desktop background layer with icon grid, supporting drag-and-drop reordering, th
 - Never hardcode icon sizes. Use `Config.desktop.iconSize`, `Config.desktop.spacingVertical`
 - Don't modify DesktopService.items directly. Use `DesktopService.moveItem()` for reordering
 - Avoid raw Rectangle for icon backgrounds. Use `Styling.srItem()` with appropriate variant
-- Don't calculate positions without considering bar position margins (top/bottom/left/right)
+- Don't calculate positions without considering notch position margins (top/bottom)

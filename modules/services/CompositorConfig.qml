@@ -15,10 +15,8 @@ QtObject {
     property var currentAnimationConfig: null
     property int animationsAttempts: 0
 
-    // The daemon is started by AxctlService at the same moment this first
-    // runs, so early reads land before its socket is bound and axctl prints a
-    // plain-text connection error to stdout. That is a race, not bad data —
-    // wait and ask again instead of parsing the error as JSON.
+    // Early reads land before the daemon binds its socket, and axctl prints a
+    // plain-text connection error to stdout. A race, not bad data — retry.
     property Timer retryAnimationsTimer: Timer {
         interval: 500
         repeat: false

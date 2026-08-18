@@ -89,10 +89,8 @@ NotchAnimationBehavior {
 
     focus: true
 
-    // Usar el comportamiento estándar de animaciones del notch
     isVisible: GlobalStates.dashboardOpen
 
-    // Navegar a la pestaña seleccionada cuando se abre el dashboard
     Component.onCompleted: {
         root.state.currentTab = GlobalStates.dashboardCurrentTab;
     }
@@ -113,7 +111,6 @@ NotchAnimationBehavior {
         }
     }
 
-    // Timer para focus en unified launcher tab
     Timer {
         id: focusUnifiedLauncherTimer
         interval: 50
@@ -125,7 +122,6 @@ NotchAnimationBehavior {
         }
     }
 
-    // Escuchar cambios en dashboardCurrentTab para navegar automáticamente
     Connections {
         target: GlobalStates
         function onDashboardCurrentTabChanged() {
@@ -134,7 +130,7 @@ NotchAnimationBehavior {
             }
         }
 
-        // Focus cuando cambia el texto del launcher (por shortcuts con prefix)
+        // Prefix shortcuts change the text without changing the tab
         function onLauncherSearchTextChanged() {
             if (isVisible && GlobalStates.dashboardCurrentTab === 0) {
                 focusUnifiedLauncherTimer.restart();
@@ -154,25 +150,20 @@ NotchAnimationBehavior {
             width: parent.width
             height: root.tabWidth
 
-            // Manejo del scroll con rueda del mouse
             WheelHandler {
                 id: wheelHandler
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
 
                 onWheel: event => {
-                    // Determinar dirección del scroll
                     let scrollUp = event.angleDelta.y > 0;
                     let newIndex = root.state.currentTab;
 
                     if (scrollUp && newIndex > 0) {
-                        // Scroll hacia arriba = pestaña anterior
                         newIndex = newIndex - 1;
                     } else if (!scrollUp && newIndex < root.tabCount - 1) {
-                        // Scroll hacia abajo = pestaña siguiente
                         newIndex = newIndex + 1;
                     }
 
-                    // Navegar solo si cambió el índice
                     if (newIndex !== root.state.currentTab) {
                         stack.navigateToTab(newIndex);
                     }
@@ -207,8 +198,7 @@ NotchAnimationBehavior {
                         contentItem: Text {
                             text: parent.text
                             textFormat: Text.RichText
-                            // Selected reads exactly as hover does — brought up
-                            // out of the dimmed idle state, nothing drawn behind
+                            // Selected reads as hover: no chrome, just undimmed
                             color: Colors.overBackground
                             opacity: root.state.currentTab === tabButton.index || tabButton.hovered ? 1.0 : 0.55
 
@@ -237,9 +227,7 @@ NotchAnimationBehavior {
                     }
                 }
 
-                // Tools opens a module rather than switching tabs, so it sits
-                // outside the Repeater and the travelling highlight ignores it —
-                // but it reads as one of the same top-left set.
+                // Opens a module, not a tab — hence outside the Repeater
                 Button {
                     id: toolsTabButton
                     flat: true
@@ -319,8 +307,7 @@ NotchAnimationBehavior {
 
                     readonly property bool lit: controlsButton.hovered || GlobalStates.settingsWindowVisible
 
-                    // Same treatment as the layout selector: nothing drawn
-                    // behind it, the glyph grows and takes the accent instead
+                    // Same treatment as the layout selector
                     scale: lit ? 1.12 : 1.0
 
                     Behavior on scale {
@@ -537,7 +524,7 @@ NotchAnimationBehavior {
                     }
                 }
 
-                // Gesture handling para swipe vertical
+                // Vertical swipe between tabs
                 MouseArea {
                     anchors.fill: parent
                     property real startY: 0
@@ -560,7 +547,7 @@ NotchAnimationBehavior {
                         let deltaY = mouse.y - startY;
                         let deltaX = Math.abs(mouse.x - startX);
 
-                        // Solo considerar swipe vertical si el movimiento horizontal es mínimo
+                        // Vertical only when horizontal movement is negligible
                         if (Math.abs(deltaY) > 20 && deltaX < 30) {
                             swiping = true;
                         }
@@ -586,7 +573,6 @@ NotchAnimationBehavior {
         }
     }
 
-    // Atajos de teclado para navegación
     Shortcut {
         id: nextTabShortcut
         sequence: "Ctrl+Tab"

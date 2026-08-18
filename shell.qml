@@ -251,9 +251,7 @@ ShellRoot {
 
         Component.onCompleted: {
             // Critical services — init immediately (next tick)
-            // Claim org.kde.StatusNotifierWatcher before tray applets start
-            // looking for it. The tray UI lives in the dashboard, which loads
-            // lazily, so nothing else owns the name at login.
+            // Claim org.kde.StatusNotifierWatcher before tray applets look for it
             let _ = SystemTray.items;
 
             Qt.callLater(() => {

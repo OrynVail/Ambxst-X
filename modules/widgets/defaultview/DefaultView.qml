@@ -117,8 +117,7 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
             }
 
-            // Collapses to nothing when empty, so the notch keeps its minimal
-            // width until something actually docks there
+            // Zero width when empty
             SysTray {
                 id: tray
                 bar: notchBarStub

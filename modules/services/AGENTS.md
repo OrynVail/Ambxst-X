@@ -11,7 +11,7 @@ Backend singletons bridging Wayland protocols, CLI tools (nmcli, upower, wpctl, 
 | **Battery/Power** | `Battery.qml` | UPower integration. Percentage, charging state, time remaining |
 | **Bluetooth** | `BluetoothService.qml` | Device listing, connect/disconnect |
 | **Brightness** | `Brightness.qml` | Per-monitor brightness via `brightnessctl` |
-| **AI Assistant** | `Ai.qml` + `ai/strategies/` | Multi-provider (OpenAI, Gemini, Mistral). Strategy pattern |
+| **Compositor** | `AxctlService.qml` | Spawns the `axctl` daemon and subscribes to its event stream |
 | **Clipboard** | `ClipboardService.qml` | Persistent clipboard via `clipboard.db` + helper scripts |
 | **Media** | `MprisController.qml` | MPRIS D-Bus player control |
 | **Notifications** | `Notifications.qml` | D-Bus notification server with persistence |

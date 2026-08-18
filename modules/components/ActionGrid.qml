@@ -14,11 +14,10 @@ FocusScope {
     property int buttonSize: 48
     property int iconSize: 20
     property int spacing: 4
-    property int columns: 3 // para layout grid
+    property int columns: 3
     property int textSpacing: 8
 
-    // Opt in to the deboxed treatment: nothing drawn at rest, dimmed idle
-    // glyphs, circular tiles. Off by default so popups keep their own chrome.
+    // Deboxed: no chrome at rest, dimmed idle glyphs, circular tiles
     property bool flat: false
 
     signal actionTriggered(var action)
@@ -172,9 +171,7 @@ FocusScope {
                                     return "primary";
                                 if (actionButton.hovered)
                                     return "focus";
-                                // Keyboard cursor lives here rather than in a
-                                // rect behind the buttons, which an opaque rest
-                                // state would paint over
+                                // Keyboard cursor lives here, not behind the buttons
                                 if (root.activeFocus && delegateWrapper.itemIndex === root.currentIndex)
                                     return "primary";
                                 return root.flat ? "transparent" : "internalbg";
@@ -184,7 +181,7 @@ FocusScope {
                         contentItem: Item {
                             anchors.fill: parent
 
-                            // 1. Icono centrado en el área base del botón (siempre fijo a la izquierda)
+                            // Icon holds the base cell, pinned left
                             Text {
                                 width: root.buttonSize
                                 height: parent.height
@@ -215,12 +212,12 @@ FocusScope {
                                 }
                             }
 
-                            // 2. Texto alineado a la derecha del área base del botón
+                            // Label sits to the right of it
                             Text {
                                 visible: delegateWrapper.hasText
                                 text: visible ? modelData.text : ""
                                 anchors.left: parent.left
-                                anchors.leftMargin: root.buttonSize // Empieza justo después del área del icono
+                                anchors.leftMargin: root.buttonSize
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 font.family: Config.defaultFont

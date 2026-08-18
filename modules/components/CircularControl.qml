@@ -5,8 +5,7 @@ import qs.config
 
 StyledRect {
     id: root
-    // Opt in to the deboxed treatment; off by default so the settings panels
-    // keep their surface.
+    // Deboxed: no surface at rest
     property bool flat: false
 
     variant: flat ? "transparent" : "pane"
@@ -139,7 +138,7 @@ StyledRect {
                     ctx.stroke();
                 }
 
-                // Dibujar handle (línea radial sobresaliente en la posición actual)
+                // Radial handle at the current position
                 if (progressCanvas.angle >= 0) {
                     let handleAngle = baseStartAngle + progressAngleRad;
                     let innerRadius = radius - 2;
@@ -158,7 +157,7 @@ StyledRect {
                     ctx.stroke();
                 }
 
-                // Dibujar resto (desde valor actual + gap hasta el final)
+                // Remainder, from current value + gap to the end
                 let remainingStart = baseStartAngle + progressAngleRad + handleGapRad;
                 let totalAngle = (360 - 2 * root.gapAngle) * Math.PI / 180;
                 let remainingEnd = baseStartAngle + totalAngle;

@@ -1,31 +1,24 @@
-# BAR MODULE KNOWLEDGE BASE
+# NOTCH WIDGETS
 
 ## OVERVIEW
-Primary system panel supporting horizontal (top/bottom) and vertical (left/right) orientations, reactive auto-hiding, and space reservation via Quickshell's `PanelWindow`. Rendered inside `UnifiedShellPanel`.
+Widgets that used to make up the bar. The bar is gone; these are consumed by the notch and
+the dashboard. The directory name is kept because everything imports `qs.modules.bar.*`.
 
 ## STRUCTURE
-- **Core Layout**:
-  - `BarContent.qml` (767 lines): Orchestrates widget groups via `RowLayout`/`ColumnLayout`. Manages auto-hide with `reveal` property + `hideDelayTimer`.
-  - `BarBg.qml` / `BarBgShadow.qml`: Background aesthetic layers.
-- **Widgets**:
-  - `clock/`: Time, date, weather integration (`Clock.qml` — 672 lines).
-  - `systray/`: SNI-based system tray.
-  - `workspaces/`: Compositor workspace visualization and navigation.
-  - `IntegratedDock.qml`: Taskbar-style dock embedded directly into bar layout.
-- **System Indicators**: Volume, brightness, battery, power profile sliders/buttons.
-
-## WHERE TO LOOK
-| Task | Location | Notes |
-|------|----------|-------|
-| **Auto-hide logic** | `BarContent.qml` | `reveal` property + `hideDelayTimer` |
-| **Space reservation** | Parent: `shell.qml` → `ReservationWindows` | `exclusiveZone` calculation |
-| **Adding widgets** | `BarContent.qml` | Update `horizontalLayout` or `verticalLayout` |
-| **Integrated dock** | `IntegratedDock.qml` | App switching within bar |
-| **Clock/Weather** | `clock/Clock.qml` | Complex: 672 lines, multiple display modes |
+| File | Purpose |
+|------|---------|
+| `clock/Clock.qml` | Time, date, weather; drives its own popup |
+| `clock/Pomodoro.qml` | Pomodoro timer with an `IpcHandler` on target `pomodoro` |
+| `systray/SysTray.qml` | SNI tray. Collapses to zero width when empty |
+| `systray/SysTrayItem.qml` | Individual tray entry with hover chip |
+| `workspaces/Workspaces.qml` | Workspace pills |
+| `BatteryIndicator.qml` | Battery readout and popup |
+| `LayoutSelector.qml` / `LayoutSelectorButton.qml` | Compositor layout switcher |
 
 ## CONVENTIONS
-- **Adaptive styling**: Widgets use `startRadius`/`endRadius` for "pill" continuity based on group position.
-- **Visibility registration**: Panels must register with `Visibilities` in `Component.onCompleted`.
-- **Orientation**: ALWAYS handle both `horizontal` and `vertical` cases in UI components.
-- **Config binding**: Use `Config.bar.*` properties for all layout-related state.
-- **Screen filtering**: Respects `Config.bar.screenList` for multi-monitor control.
+- These take a `bar` property expecting `orientation` and `barPosition`. Callers pass a
+  `QtObject` stub — see `notchBarStub` in `modules/widgets/defaultview/DefaultView.qml`.
+- `flat: true` opts into the deboxed treatment: nothing drawn at rest, glyph grows or takes
+  the accent on hover. `layerEnabled: false` disables the shadow layer.
+- Handle both `horizontal` and `vertical` orientation — the notch supports top and bottom.
+- Popups register with `Visibilities` so the notch stays revealed while one is open.

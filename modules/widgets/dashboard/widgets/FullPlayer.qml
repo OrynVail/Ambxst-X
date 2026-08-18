@@ -183,9 +183,7 @@ StyledRect {
 
     // Playback Controls
 
-    // Anchored to both edges rather than centred: centreIn leaves the column
-    // unconstrained, so a long track title grows it instead of eliding and the
-    // metadata spills out past the card.
+    // Anchored both edges: centreIn leaves it unconstrained and titles stop eliding
     ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right

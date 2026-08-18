@@ -52,8 +52,7 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 4
-                // The month row already reads as separated by its own height;
-                // a gap on top of that only starved the grid
+                // Month row's own height is the separation; a gap starves the grid
                 spacing: 0
 
                 RowLayout {

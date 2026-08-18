@@ -1,33 +1,32 @@
-# AGENTS.md - modules/notch/
+# NOTCH
 
 ## OVERVIEW
-Dynamic island UI with StackView navigation, themes (default/island), and notification popup system.
+The shell surface. There is no bar — this is it. StackView navigation between modules,
+two themes (`default` / `island`), and the notification popup system.
 
 ## STRUCTURE
-
 | File | Purpose |
 |------|---------|
-| `Notch.qml` | Core dynamic island: StackView, rounded corners with mask, theme rendering, animations |
-| `NotchContent.qml` | Screen-specific wrapper: hover detection, reveal logic, persistent Loaders, visibility bindings |
-| `NotchWindow.qml` | PanelWindow wrapper (disabled, commented out) |
-| `NotchAnimationBehavior.qml` | Reusable animation behavior component |
-| `NotchNotificationView.qml` | Notification display with StackView navigation, timestamps, hover states |
+| `Notch.qml` | The island itself: StackView, corner masking, theme rendering, animations |
+| `NotchContent.qml` | Per-screen wrapper: hover detection, reveal logic, persistent Loaders |
+| `NotchAnimationBehavior.qml` | Shared animation behaviour |
+| `NotchNotificationView.qml` | Notification display with wheel navigation |
+| `NotchWorkspaces.qml` | Workspace pills in the main row |
+| `NotchWindow.qml` | PanelWindow wrapper — disabled |
+
+Idle content is `modules/widgets/defaultview/DefaultView.qml`: logo, workspaces, clock,
+systray, battery. Its `notchBarStub` is what feeds `bar`-expecting widgets.
 
 ## WHERE TO LOOK
-
-- **StackView navigation**: `Notch.qml:326-452` - push/pop transitions with scale+opacity animations
-- **Theme rendering**: `Notch.qml:79-142` (default) and `Notch.qml:232-285` (island) - StyledRect with mask system
-- **Reveal logic**: `NotchContent.qml:101-124` - auto-hide based on `keepHidden`, bar position, fullscreen
-- **Hover detection**: `NotchContent.qml:95-148` - delay timer prevents flickering on mouse leave
-- **Notification popup**: `NotchContent.qml:306-411` - styled popup below notch with StackView
-- **Notification navigation**: `NotchNotificationView.qml:202-291` - wheel/scroll navigation, direction-aware transitions
-
-## CONVENTIONS
-
-Follows parent AGENTS.md. No additional conventions.
+- **Reveal / auto-hide** — `NotchContent.qml`, driven by `keepHidden`, notch position and
+  fullscreen state; a delay timer stops flicker on mouse leave.
+- **Width** — `DefaultView.qml` `mainRowContentWidth` follows the row's real content, so the
+  notch grows and shrinks with what is in it rather than holding a reserved width.
+- **Popup coordination** — `childPopupOpen` keeps the notch revealed while a child popup is
+  open, otherwise it auto-hides the moment the pointer leaves to reach it.
 
 ## ANTI-PATTERNS
-
-- Never hardcode notch dimensions - use `Config.notchTheme`, `Config.roundness`, `Config.notchPosition`
-- Avoid direct stack manipulation - use `Visibilities` service signals (onLauncherChanged, onDashboardChanged, etc.)
-- Don't skip `Qt.callLater()` when pushing to StackView from Connections - prevents async list modification issues
+- Hardcoding notch dimensions — use `Config.notchTheme`, `Config.roundness`,
+  `Config.notchPosition`.
+- Manipulating the stack directly — go through `Visibilities`.
+- Pushing to StackView from `Connections` without `Qt.callLater()`.

@@ -11,12 +11,9 @@ import qs.modules.services
 import qs.config
 import "calendar"
 
-// Three columns on one surface divided by hairlines rather than nested cards.
-//
-// The five toggles sit directly on top of the calendar, which is what sets them
-// apart from every other control here — that grouping does the work a border
-// used to. The knobs keep the rail along the bottom. Nothing scrolls, so
-// nothing can be clipped out of sight.
+// Three columns on one surface, divided by hairlines rather than nested cards.
+// The five toggles sit on the calendar; that grouping is what sets them apart.
+// Nothing scrolls.
 Rectangle {
     id: root
     color: "transparent"
@@ -35,8 +32,7 @@ Rectangle {
     readonly property int toggleSpacing: 4
     readonly property int toggleSize: Math.round((calendarWidth - toggleSpacing * 4) / 5)
 
-    // Bar + gutter + knob comes to one media column, so the sound group sits
-    // under the player and the mic group mirrors it at the far edge
+    // Bar + gutter + knob == one media column, so the groups align to the edges
     readonly property int sliderWidth: mediaWidth - gutter - railHeight
 
     ColumnLayout {
@@ -83,8 +79,7 @@ Rectangle {
                     z: 2 // the drawer hangs over the calendar
                 }
 
-                // Takes the rest of the column — the grid scales to fit rather
-                // than sitting at a fixed height with slack beneath it
+                // Takes the rest of the column; the grid scales to fit
                 Calendar {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -110,10 +105,8 @@ Rectangle {
 
 
         // ── Control rail ────────────────────────────────────────────────────
-        // A band, not part of the column grid, so it does not inherit their
-        // widths. Sound on the left, mic mirrored on the right, brightness
-        // alone in the dead centre of the window. Each outer group is exactly
-        // one media column wide, so they sit under the player and the far edge.
+        // A band, not part of the column grid. Sound left, mic mirrored right,
+        // brightness alone in the dead centre of the window.
         Item {
             Layout.fillWidth: true
             Layout.preferredHeight: root.railHeight
@@ -127,8 +120,7 @@ Rectangle {
 
                 StyledSlider {
                     id: volumeSlider
-                    // resizeParent false means it takes its size from the
-                    // layout; its own fillWidth default would stretch it
+                    // Sized by the layout; its own fillWidth default would stretch it
                     resizeParent: false
                     Layout.fillWidth: false
                     Layout.preferredWidth: root.sliderWidth
@@ -147,9 +139,7 @@ Rectangle {
                             Audio.sink.audio.volume = value;
                     }
 
-                    // The slider assigns its own value while dragging, which
-                    // breaks the binding above — put it back when the sink
-                    // moves from anywhere else.
+                    // Dragging assigns value and breaks the binding above; restore it
                     Connections {
                         target: Audio.sink?.audio ?? null
                         ignoreUnknownSignals: true

@@ -44,8 +44,7 @@ ActionGrid {
         }
     ]
 
-    // recordAction swaps its own icon, tooltip and variant on isRecording, so it
-    // covers both starting and stopping from the one slot.
+    // recordAction covers start and stop from one slot
     readonly property var recordGroup: [
         recordAction,
         {
@@ -107,7 +106,7 @@ ActionGrid {
 
     Process {
         id: openFolderProc
-        // Usamos nohup para desvincular el proceso de visualización de carpetas
+        // nohup so the viewer outlives the menu
         command: ["bash", "-c", "nohup xdg-open \"$0\" > /dev/null 2>&1 &"]
     }
 
@@ -126,7 +125,7 @@ ActionGrid {
             ScreenRecorder.toggleRecording();
             root.itemSelected();
         } else if (action.tooltip === "Open Screenshots") {
-            // Usamos xdg-user-dir en el comando bash para respetar las rutas del sistema
+            // xdg-user-dir so it respects system paths
             var cmd = "dir=\"$(xdg-user-dir PICTURES)/Screenshots\"; mkdir -p \"$dir\"; nohup xdg-open \"$dir\" > /dev/null 2>&1 &";
             
             openFolderProc.command = ["bash", "-c", cmd];
@@ -134,7 +133,6 @@ ActionGrid {
             
             root.itemSelected();
         } else if (action.tooltip === "Open Recordings") {
-            // Usamos xdg-user-dir para videos, manteniendo la subcarpeta Recordings
             var cmd = "dir=\"$(xdg-user-dir VIDEOS)/Recordings\"; mkdir -p \"$dir\"; nohup xdg-open \"$dir\" > /dev/null 2>&1 &";
             
             openFolderProc.command = ["bash", "-c", cmd];
