@@ -5,7 +5,11 @@ import qs.config
 
 StyledRect {
     id: root
-    variant: "pane"
+    // Opt in to the deboxed treatment; off by default so the settings panels
+    // keep their surface.
+    property bool flat: false
+
+    variant: flat ? "transparent" : "pane"
     backgroundOpacity: showBackground ? -1 : 0
     enableBorder: showBackground
 

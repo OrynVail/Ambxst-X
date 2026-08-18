@@ -17,6 +17,10 @@ FocusScope {
     property int columns: 3 // para layout grid
     property int textSpacing: 8
 
+    // Opt in to the deboxed treatment: nothing drawn at rest, dimmed idle
+    // glyphs, circular tiles. Off by default so popups keep their own chrome.
+    property bool flat: false
+
     signal actionTriggered(var action)
 
     property int currentIndex: 0
@@ -94,100 +98,6 @@ FocusScope {
         anchors.fill: parent
         color: "transparent"
 
-        // Highlight que se desplaza entre botones
-        StyledRect {
-            id: highlight
-            variant: (repeater.count > 0 && repeater.itemAt(root.currentIndex) && repeater.itemAt(root.currentIndex).actionModel.variant) ? repeater.itemAt(root.currentIndex).actionModel.variant : "primary"
-            radius: Styling.radius(4)
-            z: 0 // Por debajo de los botones
-            // Keyboard-navigation cursor only — per-button states carry the look
-            visible: root.activeFocus && repeater.count > 0
-
-            property Item targetItem: repeater.count > 0 ? repeater.itemAt(root.currentIndex) : null
-
-            // Target values (geometry relative to container)
-            property real tx: targetItem ? targetItem.x : 0
-            property real ty: targetItem ? targetItem.y : 0
-            property real tw: targetItem ? targetItem.width : 0
-            property real th: targetItem ? targetItem.height : 0
-
-            // Tracker 1 (Fast / Lead)
-            property real t1x: tx
-            property real t1y: ty
-            property real t1w: tw
-            property real t1h: th
-
-            Behavior on t1x {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration / 3
-                    easing.type: Easing.OutSine
-                }
-            }
-            Behavior on t1y {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration / 3
-                    easing.type: Easing.OutSine
-                }
-            }
-            Behavior on t1w {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration / 3
-                    easing.type: Easing.OutSine
-                }
-            }
-            Behavior on t1h {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration / 3
-                    easing.type: Easing.OutSine
-                }
-            }
-
-            // Tracker 2 (Slow / Follow)
-            property real t2x: tx
-            property real t2y: ty
-            property real t2w: tw
-            property real t2h: th
-
-            Behavior on t2x {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: Easing.OutSine
-                }
-            }
-            Behavior on t2y {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: Easing.OutSine
-                }
-            }
-            Behavior on t2w {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: Easing.OutSine
-                }
-            }
-            Behavior on t2h {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: Easing.OutSine
-                }
-            }
-
-            // Final geometry combining both trackers to create elastic effect
-            x: Math.min(t1x, t2x) + container.x
-            y: Math.min(t1y, t2y) + container.y
-            width: Math.max(t1x + t1w, t2x + t2w) - Math.min(t1x, t2x)
-            height: Math.max(t1y + t1h, t2y + t2h) - Math.min(t1y, t2y)
-        }
-
         Grid {
             id: container
             anchors.centerIn: parent
@@ -202,6 +112,7 @@ FocusScope {
                 delegate: Item {
                     id: delegateWrapper
                     readonly property bool isSeparator: (modelData.type === "separator")
+                    readonly property int itemIndex: index
                     property var actionModel: modelData
 
                     implicitWidth: isSeparator ? (root.layout === "row" ? 2 : root.buttonSize) : (root.buttonSize + (hasText ? textMetrics.width + root.textSpacing : 0))
@@ -252,7 +163,7 @@ FocusScope {
 
                         background: StyledRect {
                             id: actionBg
-                            radius: Styling.radius(4)
+                            radius: root.flat && root.layout === "grid" ? height / 2 : Styling.radius(4)
                             variant: {
                                 const declared = delegateWrapper.actionModel ? delegateWrapper.actionModel.variant : "";
                                 if (declared)
@@ -261,7 +172,12 @@ FocusScope {
                                     return "primary";
                                 if (actionButton.hovered)
                                     return "focus";
-                                return "internalbg";
+                                // Keyboard cursor lives here rather than in a
+                                // rect behind the buttons, which an opaque rest
+                                // state would paint over
+                                if (root.activeFocus && delegateWrapper.itemIndex === root.currentIndex)
+                                    return "primary";
+                                return root.flat ? "transparent" : "internalbg";
                             }
                         }
 
@@ -278,8 +194,17 @@ FocusScope {
                                 font.family: Icons.font
                                 font.pixelSize: root.iconSize
                                 color: actionBg.item
+                                opacity: !root.flat || actionButton.hovered || actionButton.pressed ? 1.0 : 0.55
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
+
+                                Behavior on opacity {
+                                    enabled: Config.animDuration > 0
+                                    NumberAnimation {
+                                        duration: Config.animDuration / 2
+                                        easing.type: Easing.OutQuart
+                                    }
+                                }
 
                                 Behavior on color {
                                     enabled: Config.animDuration > 0

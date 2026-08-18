@@ -10,11 +10,11 @@ import qs.config
 ToggleButton {
     id: root
 
-    readonly property int logoSize: Config.notch?.logoSize ?? 28
+    readonly property int logoSize: Config.notch?.logoSize ?? 23
 
     buttonIcon: (Config.notch?.logoIcon || "") !== "" ? Config.notch.logoIcon : Qt.resolvedUrl("../../../assets/ambxst/ambxst-icon.svg").toString().replace("file://", "")
-    iconTint: Config.notch?.logoTint ?? true
-    iconFullTint: Config.notch?.logoFullTint ?? true
+    iconTint: Config.notch?.logoTint ?? false
+    iconFullTint: Config.notch?.logoFullTint ?? false
     iconSize: logoSize
 
     // Sits flat in the notch like the rest of the row: no background, grows on hover

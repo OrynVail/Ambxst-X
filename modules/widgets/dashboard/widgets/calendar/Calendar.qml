@@ -43,7 +43,7 @@ Item {
 
         StyledRect {
             id: calendarPane
-            variant: "pane"
+            variant: "transparent"
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: Styling.radius(4)
@@ -52,37 +52,40 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 4
-                spacing: 4
+                // The month row already reads as separated by its own height;
+                // a gap on top of that only starved the grid
+                spacing: 0
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.maximumHeight: 32
+                    Layout.maximumHeight: Styling.control
                     spacing: 4
 
                     StyledRect {
                         id: titleRect
-                        variant: "internalbg"
+                        variant: "transparent"
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Styling.radius(0)
 
                         Text {
-                            anchors.centerIn: parent
+                            anchors.left: parent.left
+                            anchors.leftMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
                             text: viewingDate.toLocaleDateString(Qt.locale(), "MMMM yyyy")
                             font.family: Config.defaultFont
                             font.pixelSize: Config.theme.fontSize
-                            font.weight: Font.Bold
+                            font.weight: Font.Medium
                             color: titleRect.item
-                            horizontalAlignment: Text.AlignHCenter
+                            opacity: 0.55
                         }
                     }
 
                     StyledRect {
                         id: leftButton
-                        variant: leftMouseArea.pressed ? "primary" : (leftMouseArea.containsMouse ? "focus" : "internalbg")
-                        Layout.preferredWidth: 32
+                        variant: leftMouseArea.pressed ? "primary" : (leftMouseArea.containsMouse ? "focus" : "transparent")
+                        Layout.preferredWidth: Styling.control
                         Layout.fillHeight: true
-                        radius: Styling.radius(0)
+                        radius: height / 2
 
                         readonly property color buttonItem: leftMouseArea.pressed ? itemColor : Styling.srItem("overprimary")
 
@@ -90,8 +93,9 @@ Item {
                             anchors.centerIn: parent
                             text: Icons.caretLeft
                             font.family: Icons.font
-                            font.pixelSize: 16
+                            font.pixelSize: Styling.glyph
                             color: leftButton.buttonItem
+                            opacity: leftMouseArea.containsMouse ? 1.0 : 0.55
                         }
 
                         MouseArea {
@@ -105,10 +109,10 @@ Item {
 
                     StyledRect {
                         id: rightButton
-                        variant: rightMouseArea.pressed ? "primary" : (rightMouseArea.containsMouse ? "focus" : "internalbg")
-                        Layout.preferredWidth: 32
+                        variant: rightMouseArea.pressed ? "primary" : (rightMouseArea.containsMouse ? "focus" : "transparent")
+                        Layout.preferredWidth: Styling.control
                         Layout.fillHeight: true
-                        radius: Styling.radius(0)
+                        radius: height / 2
 
                         readonly property color buttonItem: rightMouseArea.pressed ? itemColor : Styling.srItem("overprimary")
 
@@ -116,8 +120,9 @@ Item {
                             anchors.centerIn: parent
                             text: Icons.caretRight
                             font.family: Icons.font
-                            font.pixelSize: 16
+                            font.pixelSize: Styling.glyph
                             color: rightButton.buttonItem
+                            opacity: rightMouseArea.containsMouse ? 1.0 : 0.55
                         }
 
                         MouseArea {
@@ -131,14 +136,14 @@ Item {
                 }
 
                 StyledRect {
-                    variant: "internalbg"
+                    variant: "transparent"
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: Styling.radius(0)
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 8
+                        anchors.margins: 2
                         spacing: 0
 
                         RowLayout {
@@ -169,9 +174,10 @@ Item {
                             model: 6
                             delegate: StyledRect {
                                 Layout.fillWidth: true
+                                Layout.fillHeight: true
                                 Layout.alignment: Qt.AlignHCenter
                                 Layout.preferredHeight: 28
-                                variant: (rowIndex === root.currentWeekRow) ? "pane" : "transparent"
+                                variant: "transparent"
                                 radius: Styling.radius(-4)
 
                                 required property int index

@@ -6,6 +6,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Services.SystemTray
 import qs.modules.bar
 import qs.modules.bar.workspaces
 import qs.modules.notifications
@@ -250,8 +251,13 @@ ShellRoot {
 
         Component.onCompleted: {
             // Critical services — init immediately (next tick)
+            // Claim org.kde.StatusNotifierWatcher before tray applets start
+            // looking for it. The tray UI lives in the dashboard, which loads
+            // lazily, so nothing else owns the name at login.
+            let _ = SystemTray.items;
+
             Qt.callLater(() => {
-                let _ = CaffeineService.inhibit;
+                _ = CaffeineService.inhibit;
                 _ = IdleService.lockCmd; // Force init
                 _ = GlobalShortcuts.appId; // Force init (IPC pipe listener)
             });

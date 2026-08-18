@@ -16,32 +16,55 @@ StyledRect {
 
     property bool isHovered: mouseArea.containsMouse
 
-    variant: {
-        if (isActive && isHovered)
-            return "primaryfocus";
-        if (isActive)
-            return "primary";
-        if (isHovered)
-            return "focus";
-        return "pane";
-    }
+    // The cell stays 48 for hit area and rhythm; the chip that actually gets
+    // painted is smaller, so a row with most toggles on doesn't turn into a
+    // wall of discs. State is fill — the radius never changes.
+    variant: "transparent"
 
-    radius: root.isActive ? Styling.radius(0) : Styling.radius(4)
-
-    Text {
+    StyledRect {
+        id: chip
         anchors.centerIn: parent
-        text: root.iconName
-        color: root.item
-        font.family: Icons.font
-        font.pixelSize: 18
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        width: Math.min(parent.width, parent.height) - 8
+        height: width
+        radius: height / 2
 
-        Behavior on color {
-            enabled: Config.animDuration > 0
-            ColorAnimation {
-                duration: Config.animDuration / 2
-                easing.type: Easing.OutQuart
+        variant: {
+            if (root.isActive && root.isHovered)
+                return "primaryfocus";
+            if (root.isActive)
+                return "primary";
+            if (root.isHovered)
+                return "focus";
+            return "transparent";
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: root.iconName
+            color: chip.item
+            opacity: root.isActive || root.isHovered ? 1.0 : 0.55
+            font.family: Icons.font
+            // Proportional to the chip rather than the Styling.glyph token, so
+            // the glyph grows when the row is sized to a column instead of to
+            // the standard control
+            font.pixelSize: Math.round(chip.height * 0.55)
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+
+            Behavior on opacity {
+                enabled: Config.animDuration > 0
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutQuart
+                }
+            }
+
+            Behavior on color {
+                enabled: Config.animDuration > 0
+                ColorAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutQuart
+                }
             }
         }
     }

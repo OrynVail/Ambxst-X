@@ -32,7 +32,7 @@ var data = {
     },
     "ocr": {
         "eng": true,
-        "spa": true,
+        "spa": false,
         "lat": false,
         "jpn": false,
         "chi_sim": false,
@@ -40,7 +40,7 @@ var data = {
         "kor": false
     },
     "pomodoro": {
-        "workTime": 1500,
+        "workTime": 1800,
         "restTime": 300,
         "autoStart": false,
         "syncSpotify": false

@@ -5,7 +5,9 @@ import qs.modules.theme
 import qs.modules.components
 
     StyledRect {
-    variant: "bg"
+    // Icons render straight onto whatever is behind; each item carries its own
+    // hover chip, so the container itself draws nothing.
+    variant: "transparent"
     id: root
 
     // Hide when no tray items

@@ -137,12 +137,12 @@ Singleton {
             property int monoFontSize: 14
             property bool tintIcons: false
             property bool enableCorners: true
-            property int animDuration: 300
-            property real shadowOpacity: 0.5
+            property int animDuration: 150
+            property real shadowOpacity: 1
             property string shadowColor: "shadow"
             property int shadowXOffset: 0
             property int shadowYOffset: 0
-            property real shadowBlur: 1
+            property real shadowBlur: 1.52
 
             property JsonObject srBg: JsonObject {
                 property string label: "Background"
@@ -563,8 +563,8 @@ Singleton {
         }
 
         adapter: JsonAdapter {
-            property int shown: 10
-            property bool showAppIcons: true
+            property int shown: 9
+            property bool showAppIcons: false
             property bool alwaysShowNumbers: false
             property bool showNumbers: false
             property bool dynamic: false
@@ -652,16 +652,16 @@ Singleton {
         adapter: JsonAdapter {
             property string theme: "default"
             property string position: "top"
-            property int hoverRegionHeight: 8
-            property bool keepHidden: false
-            property bool disableHoverExpansion: true
+            property int hoverRegionHeight: 16
+            property bool keepHidden: true
+            property bool disableHoverExpansion: false
             property bool alwaysVisible: false
-            property bool availableOnFullscreen: false
-            property bool reserveSpace: true
+            property bool availableOnFullscreen: true
+            property bool reserveSpace: false
             property string logoIcon: ""
-            property bool logoTint: true
-            property bool logoFullTint: true
-            property int logoSize: 28
+            property bool logoTint: false
+            property bool logoFullTint: false
+            property int logoSize: 23
             property bool use12hFormat: false
         }
     }
@@ -1020,7 +1020,7 @@ Singleton {
             }
             property JsonObject ocr: JsonObject {
                 property bool eng: true
-                property bool spa: true
+                property bool spa: false
                 property bool lat: false
                 property bool jpn: false
                 property bool chi_sim: false
@@ -1028,7 +1028,7 @@ Singleton {
                 property bool kor: false
             }
             property JsonObject pomodoro: JsonObject {
-                property int workTime: 1500
+                property int workTime: 1800
                 property int restTime: 300
                 property bool autoStart: false
                 property bool syncSpotify: false
@@ -1074,14 +1074,14 @@ Singleton {
             property bool enabled: false
             property string theme: "default"
             property string position: "bottom"
-            property int height: 56
-            property int iconSize: 40
+            property int height: 48
+            property int iconSize: 24
             property int spacing: 4
-            property int margin: 8
-            property int hoverRegionHeight: 4
+            property int margin: 4
+            property int hoverRegionHeight: 16
             property bool pinnedOnStartup: false
             property bool hoverToReveal: true
-            property bool availableOnFullscreen: false
+            property bool availableOnFullscreen: true
             property bool showRunningIndicators: true
             property bool showPinButton: true
             property bool showOverviewButton: true

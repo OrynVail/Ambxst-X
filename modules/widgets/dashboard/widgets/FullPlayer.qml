@@ -20,10 +20,9 @@ StyledRect {
     visible: true
     radius: playerRadius
 
-    // Content-driven, with room to breathe now that the profile row is gone
-    implicitHeight: content.implicitHeight + 56
+    implicitHeight: 400
 
-    readonly property bool isDragging: seekBar.isDragging
+    readonly property bool isDragging: realSeekBar.isDragging
 
     property bool isPlaying: MprisController.activePlayer?.playbackState === MprisPlaybackState.Playing
     property real position: MprisController.activePlayer?.position ?? 0.0
@@ -60,11 +59,11 @@ StyledRect {
 
     // Function to sync seekBar with current media position
     function syncSeekBarPosition() {
-        if (!seekBar.isDragging && !player.isSeeking) {
+        if (!realSeekBar.isDragging && !player.isSeeking) {
             if (player.hasActivePlayer) {
-                seekBar.value = player.length > 0 ? player.position / player.length : 0;
+                realSeekBar.value = player.length > 0 ? player.position / player.length : 0;
             } else {
-                seekBar.value = 0;
+                realSeekBar.value = 0;
             }
         }
     }
@@ -184,40 +183,227 @@ StyledRect {
 
     // Playback Controls
 
+    // Anchored to both edges rather than centred: centreIn leaves the column
+    // unconstrained, so a long track title grows it instead of eliding and the
+    // metadata spills out past the card.
     ColumnLayout {
-        id: content
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
+        anchors.leftMargin: Styling.gutter
+        anchors.rightMargin: Styling.gutter
         spacing: 8
 
-        // Title only — album/artist/duration dropped to keep the card compact
-        Text {
-            Layout.fillWidth: true
-            text: player.hasActivePlayer ? (MprisController.activePlayer?.trackTitle ?? "") : "Nothing Playing"
-            color: Colors.overBackground
-            font.pixelSize: Config.theme.fontSize
-            font.weight: Font.Bold
-            font.family: Config.theme.font
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-            maximumLineCount: 1
+        // Disc Area (SeekBar + Cover Art)
+
+        Item {
+            id: discArea
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 180
+            Layout.preferredHeight: 180
+            Layout.topMargin: -8
+            Layout.bottomMargin: -24
+
+            CircularSeekBar {
+                id: realSeekBar
+                anchors.fill: parent
+                accentColor: Colors.primary
+                trackColor: Colors.outline
+                lineWidth: 6
+                handleSpacing: 20
+
+                startAngleDeg: 180
+                spanAngleDeg: 180
+
+                enabled: player.hasActivePlayer && (MprisController.activePlayer?.canSeek ?? false)
+
+                onValueEdited: newValue => {
+                    if (MprisController.activePlayer && MprisController.activePlayer.canSeek) {
+                        player.isSeeking = true;
+                        seekUnlockTimer.restart();
+                        realSeekBar.value = newValue;
+                        MprisController.activePlayer.position = newValue * player.length;
+                    }
+                }
+            }
+
+            // Cover Art Disc - with layer caching for GPU efficiency
+            Item {
+                id: coverDiscContainer
+                anchors.centerIn: parent
+                width: parent.width - 52
+                height: parent.height - 52
+
+                // Layer caches the circular clip, rotation happens on cached texture
+                layer.enabled: true
+                layer.smooth: true
+
+                ClippingRectangle {
+                    id: clippedDisc
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: Colors.surface
+
+                    Image {
+                        mipmap: true
+                        id: coverArt
+                        anchors.fill: parent
+                        source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : player.wallpaperPath
+                        sourceSize: Qt.size(256, 256)
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+
+                        // Placeholder for a track with no art
+                        Rectangle {
+                            anchors.fill: parent
+                            color: Colors.surface
+                            visible: !player.hasArtwork && player.wallpaperPath === ""
+                        }
+                    }
+                }
+
+                property bool shouldRotate: Config.performance.rotateCoverArt
+                onShouldRotateChanged: {
+                    if (shouldRotate) {
+                        if (player.isPlaying && player.visible) {
+                            // Start
+                            springAnim.stop();
+                            let currentRotation = coverDiscContainer.rotation % 360;
+                            if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+                            rotateAnim.from = currentRotation;
+                            rotateAnim.to = currentRotation + 360;
+                            rotateAnim.restart();
+                        }
+                    } else {
+                        // Always reset if disabled, regardless of running state
+                        rotateAnim.stop();
+                        let currentRotation = coverDiscContainer.rotation % 360;
+                        if (currentRotation < 0) currentRotation += 360;
+                        coverDiscContainer.rotation = currentRotation;
+                        springAnim.to = currentRotation > 180 ? 360 : 0;
+                        springAnim.start();
+                    }
+                }
+
+                // Run on Main Thread (CPU) to reduce GPU load/usage
+                NumberAnimation on rotation {
+                    id: rotateAnim
+                    from: 0
+                    to: 360
+                    duration: 8000
+                    loops: Animation.Infinite
+                    running: false
+                }
+
+                // Standalone spring animation for inertia (can be stopped)
+                SpringAnimation {
+                    id: springAnim
+                    target: coverDiscContainer
+                    property: "rotation"
+                    spring: 0.8
+                    damping: 0.05
+                    epsilon: 0.25
+                }
+
+                Connections {
+                    target: player
+                    function onIsPlayingChanged() {
+                        if (player.isPlaying && player.visible && coverDiscContainer.shouldRotate) {
+                            // Stop spring animation immediately and capture current position
+                            springAnim.stop();
+                            
+                            // Normalize current rotation to 0-360 range to keep values sane
+                            let currentRotation = coverDiscContainer.rotation % 360;
+                            if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+
+                            rotateAnim.from = currentRotation;
+                            rotateAnim.to = currentRotation + 360;
+                            rotateAnim.restart();
+                        } else {
+                            // Stop continuous rotation
+                            rotateAnim.stop();
+                            
+                            // Normalize before snapping to ensure we snap to 0 or 360 of the CURRENT loop
+                            let currentRotation = coverDiscContainer.rotation % 360;
+                            if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+
+                            // Animate to nearest rest position (0 or 360) with inertia
+                            springAnim.to = currentRotation > 180 ? 360 : 0;
+                            springAnim.start();
+                        }
+                    }
+
+                    function onVisibleChanged() {
+                        if (!player.visible) {
+                            rotateAnim.stop();
+                            springAnim.stop();
+                        } else if (player.isPlaying && coverDiscContainer.shouldRotate) {
+                            springAnim.stop();
+                            let currentRotation = coverDiscContainer.rotation % 360;
+                            if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+
+                            rotateAnim.from = currentRotation;
+                            rotateAnim.to = currentRotation + 360;
+                            rotateAnim.restart();
+                        }
+                    }
+                }
+            }
         }
 
-        // Flat seek bar (replaces the circular ring)
-        PositionSlider {
-            id: seekBar
-            player: MprisController.activePlayer
-            wavy: false
-            Layout.fillWidth: true
-            Layout.preferredHeight: 8
-            Layout.topMargin: 2
-            Layout.bottomMargin: 2
-            opacity: MprisController.activePlayer !== null ? 1.0 : 0.4
-        }
+        // Metadata
 
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 2
+
+            Text {
+                Layout.fillWidth: true
+                Layout.preferredHeight: visible ? implicitHeight : 0
+                text: player.hasActivePlayer ? (MprisController.activePlayer?.trackTitle ?? "") : "Nothing Playing"
+                color: Colors.overBackground
+                font.pixelSize: Config.theme.fontSize + 2
+                font.weight: Font.Bold
+                font.family: Config.theme.font
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                visible: text !== ""
+            }
+
+            Text {
+                Layout.fillWidth: true
+                Layout.preferredHeight: visible ? implicitHeight : 0
+                text: player.hasActivePlayer ? (MprisController.activePlayer?.trackAlbum ?? "") : "Enjoy the silence"
+                color: Colors.overBackground
+                font.pixelSize: Config.theme.fontSize
+                font.family: Config.theme.font
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                opacity: 0.7
+                visible: text !== ""
+            }
+
+            Text {
+                Layout.fillWidth: true
+                Layout.preferredHeight: visible ? implicitHeight : 0
+                text: player.hasActivePlayer ? (MprisController.activePlayer?.trackArtist ?? "") : "¯\\_(ツ)_/¯"
+                color: Colors.overBackground
+                font.pixelSize: Config.theme.fontSize
+                font.family: Config.theme.font
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                opacity: 0.7
+                visible: text !== ""
+            }
+        }
 
         RowLayout {
             Layout.alignment: Qt.AlignHCenter
@@ -333,6 +519,15 @@ StyledRect {
             }
         }
 
+        // Duration Area
+        Text {
+            Layout.alignment: Qt.AlignHCenter
+            text: player.hasActivePlayer ? (player.formatTime(player.position) + " / " + player.formatTime(player.length)) : "--:-- / --:--"
+            color: Colors.overBackground
+            font.pixelSize: Config.theme.fontSize - 2
+            font.family: Config.theme.font
+            opacity: 0.5
+        }
     }
 
     // Players List Overlay

@@ -15,7 +15,7 @@ ActionGrid {
     QtObject {
         id: recordAction
         property string icon: ScreenRecorder.isRecording ? Icons.stop : Icons.recordScreen
-        property string text: ""
+        property string text: ScreenRecorder.isRecording ? ScreenRecorder.duration : ""
         property string tooltip: ScreenRecorder.isRecording ? "Stop Recording" : "Screen Recorder"
         property string command: ""
         property string variant: ScreenRecorder.isRecording ? "error" : "primary"
@@ -33,20 +33,21 @@ ActionGrid {
 
     readonly property var captureGroup: [
         {
+            icon: Icons.camera,
+            tooltip: "Screenshot",
+            command: ""
+        },
+        {
             icon: Icons.screenshots,
             tooltip: "Open Screenshots",
             command: ""
         }
     ]
 
-    readonly property var recordGroup: ScreenRecorder.isRecording ? [
+    // recordAction swaps its own icon, tooltip and variant on isRecording, so it
+    // covers both starting and stopping from the one slot.
+    readonly property var recordGroup: [
         recordAction,
-        {
-            icon: Icons.recordings,
-            tooltip: "Open Recordings",
-            command: ""
-        }
-    ] : [
         {
             icon: Icons.recordings,
             tooltip: "Open Recordings",
@@ -113,7 +114,15 @@ ActionGrid {
     onActionTriggered: action => {
         console.log("Tools action triggered:", action.tooltip);
 
-        if (action.tooltip === "Stop Recording") {
+        if (action.tooltip === "Screenshot") {
+            Screenshot.initialize();
+            GlobalStates.screenshotToolVisible = true;
+            root.itemSelected();
+        } else if (action.tooltip === "Screen Recorder") {
+            ScreenRecorder.initialize();
+            GlobalStates.screenRecordToolVisible = true;
+            root.itemSelected();
+        } else if (action.tooltip === "Stop Recording") {
             ScreenRecorder.toggleRecording();
             root.itemSelected();
         } else if (action.tooltip === "Open Screenshots") {

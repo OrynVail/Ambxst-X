@@ -3,15 +3,15 @@
 var data = {
     "theme": "default",
     "position": "top",
-    "hoverRegionHeight": 8,
-    "keepHidden": false,
-    "disableHoverExpansion": true,
+    "hoverRegionHeight": 16,
+    "keepHidden": true,
+    "disableHoverExpansion": false,
     "alwaysVisible": false,
-    "availableOnFullscreen": false,
-    "reserveSpace": true,
+    "availableOnFullscreen": true,
+    "reserveSpace": false,
     "logoIcon": "",
-    "logoTint": true,
-    "logoFullTint": true,
-    "logoSize": 28,
+    "logoTint": false,
+    "logoFullTint": false,
+    "logoSize": 23,
     "use12hFormat": false
 }

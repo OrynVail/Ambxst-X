@@ -1,8 +1,8 @@
 .pragma library
 
 var data = {
-    "shown": 10,
-    "showAppIcons": true,
+    "shown": 9,
+    "showAppIcons": false,
     "alwaysShowNumbers": false,
     "showNumbers": false,
     "dynamic": false

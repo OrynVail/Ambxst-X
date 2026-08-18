@@ -13,7 +13,9 @@ Rectangle {
     property bool isCurrentDayOfWeek: false
 
     Layout.fillWidth: true
-    Layout.fillHeight: false
+    // Grows with its row so the grid scales with the column instead of
+    // stranding empty space under six fixed 28px rows
+    Layout.fillHeight: true
     Layout.preferredWidth: 28
     Layout.preferredHeight: 28
 

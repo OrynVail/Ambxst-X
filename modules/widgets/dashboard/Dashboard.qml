@@ -26,9 +26,10 @@ NotchAnimationBehavior {
     readonly property var tabModel: [Icons.widgets, Icons.wallpapers, Icons.heartbeat]
     readonly property int tabCount: tabModel.length
     readonly property int tabSpacing: 8
+    readonly property int pad: Styling.gutter
 
-    readonly property int tabWidth: 48
-    readonly property real nonAnimWidth: (state.currentTab === 0 ? 600 : 400) + tabWidth + 16 // unified launcher tab is wider
+    readonly property int tabWidth: Styling.control
+    readonly property real nonAnimWidth: (state.currentTab === 0 ? 600 : 400) + 16 // unified launcher tab is wider; nav no longer takes width
 
     implicitWidth: nonAnimWidth
     implicitHeight: 430
@@ -141,16 +142,17 @@ NotchAnimationBehavior {
         }
     }
 
-    Row {
+    Column {
         id: mainLayout
         anchors.fill: parent
-        spacing: 8
+        anchors.margins: root.pad
+        spacing: Styling.tight
 
-        // Tab buttons
+        // Top navigation strip
         Item {
             id: tabsContainer
-            width: root.tabWidth
-            height: parent.height
+            width: parent.width
+            height: root.tabWidth
 
             // Manejo del scroll con rueda del mouse
             WheelHandler {
@@ -177,75 +179,25 @@ NotchAnimationBehavior {
                 }
             }
 
-            // Background highlight que se desplaza verticalmente con efecto elástico
-            StyledRect {
-                id: tabHighlight
-                variant: "primary"
-                width: parent.width
-                radius: Styling.radius(4)
-                z: 0
 
-                property real idx1: root.state.currentTab
-                property real idx2: root.state.currentTab
-
-                // Calcular posición Y para un índice dado
-                function getYForIndex(idx) {
-                    if (idx <= 2) {
-                        return idx * (width + root.tabSpacing);
-                    } else {
-                        // Controls button at the bottom
-                        return controlsButtonContainer.y;
-                    }
-                }
-
-                property real targetY1: getYForIndex(idx1)
-                property real targetY2: getYForIndex(idx2)
-
-                property real animatedY1: targetY1
-                property real animatedY2: targetY2
-
-                x: 0
-                y: Math.min(animatedY1, animatedY2)
-                height: Math.abs(animatedY2 - animatedY1) + width
-
-                Behavior on animatedY1 {
-                    enabled: Config.animDuration > 0
-                    NumberAnimation {
-                        duration: Config.animDuration / 3
-                        easing.type: Easing.OutSine
-                    }
-                }
-                Behavior on animatedY2 {
-                    enabled: Config.animDuration > 0
-                    NumberAnimation {
-                        duration: Config.animDuration
-                        easing.type: Easing.OutSine
-                    }
-                }
-
-                onTargetY1Changed: animatedY1 = targetY1
-                onTargetY2Changed: animatedY2 = targetY2
-            }
-
-            Column {
+            Row {
                 id: tabs
-                anchors.top: parent.top
                 anchors.left: parent.left
-                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: root.tabSpacing
 
                 Repeater {
                     model: root.tabModel
 
                     Button {
+                        id: tabButton
                         required property int index
                         required property string modelData
 
                         text: modelData
                         flat: true
-                        width: tabsContainer.width
-                        height: width
-                        // implicitHeight: (tabsContainer.height - root.tabSpacing * (root.tabCount - 1)) / root.tabCount
+                        width: root.tabWidth
+                        height: root.tabWidth
 
                         background: Rectangle {
                             color: "transparent"
@@ -255,11 +207,19 @@ NotchAnimationBehavior {
                         contentItem: Text {
                             text: parent.text
                             textFormat: Text.RichText
-                            color: root.state.currentTab === index ? Styling.srItem("primary") : Colors.overBackground
+                            // Selected reads exactly as hover does — brought up
+                            // out of the dimmed idle state, nothing drawn behind
+                            color: Colors.overBackground
+                            opacity: root.state.currentTab === tabButton.index || tabButton.hovered ? 1.0 : 0.55
+
+                            Behavior on opacity {
+                                enabled: Config.animDuration > 0
+                                NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutQuart }
+                            }
                             // font.family: Config.theme.font
                             font.family: Icons.font
                             // font.pixelSize: Config.theme.fontSize
-                            font.pixelSize: 20
+                            font.pixelSize: Styling.glyph
                             font.weight: Font.Medium
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -277,19 +237,48 @@ NotchAnimationBehavior {
                     }
                 }
 
-                // Window layout selector — sits under the system info tab
-                Item {
-                    width: tabsContainer.width
-                    height: width
+                // Tools opens a module rather than switching tabs, so it sits
+                // outside the Repeater and the travelling highlight ignores it —
+                // but it reads as one of the same top-left set.
+                Button {
+                    id: toolsTabButton
+                    flat: true
+                    width: root.tabWidth
+                    height: root.tabWidth
 
-                    LayoutSelectorButton {
-                        anchors.centerIn: parent
-                        width: 36
-                        height: 36
-                        bar: navRailStub
-                        flat: true
-                        layerEnabled: false
+                    readonly property bool toolsActive: Visibilities.currentActiveModule === "tools"
+
+                    background: Rectangle {
+                        color: "transparent"
+                        radius: Styling.radius(4)
                     }
+
+                    contentItem: Text {
+                        text: Icons.toolbox
+                        color: Colors.overBackground
+                        opacity: toolsTabButton.toolsActive || toolsTabButton.hovered ? 1.0 : 0.55
+
+                        font.family: Icons.font
+                        font.pixelSize: Styling.glyph
+                        font.weight: Font.Medium
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+
+                        Behavior on opacity {
+                            enabled: Config.animDuration > 0
+                            NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutQuart }
+                        }
+
+                        Behavior on color {
+                            enabled: Config.animDuration > 0
+                            ColorAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+                    }
+
+                    onClicked: Visibilities.setActiveModule(toolsTabButton.toolsActive ? "" : "tools")
                 }
             }
 
@@ -297,113 +286,138 @@ NotchAnimationBehavior {
             // uses barPosition to decide which way its popup opens.
             QtObject {
                 id: navRailStub
-                property string orientation: "vertical"
-                property string barPosition: "left"
+                property string orientation: "horizontal"
+                property string barPosition: "top"
             }
 
-            // Controls button (separate at bottom)
-            StyledRect {
-                id: controlsButtonContainer
-                anchors.bottom: powerButtonContainer.top
-                anchors.bottomMargin: root.tabSpacing
-                anchors.left: parent.left
+            // System group, opposite the tab group
+            Row {
+                id: rightGroup
                 anchors.right: parent.right
-                height: width
-                radius: Styling.radius(4)
-                variant: controlsButton.hovered ? "focus" : "common"
-                z: -1
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: root.tabSpacing
 
-                opacity: GlobalStates.settingsWindowVisible ? 0 : 1
+                Item {
+                    width: root.tabWidth
+                    height: root.tabWidth
 
-                Behavior on opacity {
-                    enabled: Config.animDuration > 0
-                    NumberAnimation {
-                        duration: Config.animDuration
-                        easing.type: Easing.OutCubic
+                    LayoutSelectorButton {
+                        anchors.centerIn: parent
+                        width: Styling.control
+                        height: Styling.control
+                        bar: navRailStub
+                        flat: true
+                        layerEnabled: false
                     }
                 }
-            }
 
-            Button {
-                id: controlsButton
-                anchors.bottom: powerButtonContainer.top
-                anchors.bottomMargin: root.tabSpacing
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width
-                flat: true
-                hoverEnabled: true
-                z: 1
+                // Settings
+                Item {
+                    id: controlsButtonContainer
+                    width: root.tabWidth
+                    height: root.tabWidth
 
-                background: Rectangle {
-                    color: "transparent"
-                }
+                    readonly property bool lit: controlsButton.hovered || GlobalStates.settingsWindowVisible
 
-                contentItem: Text {
-                    text: Icons.gear
-                    font.family: Icons.font
-                    font.pixelSize: 20
-                    font.weight: Font.Medium
-                    color: GlobalStates.settingsWindowVisible ? Styling.srItem("primary") : Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                    // Same treatment as the layout selector: nothing drawn
+                    // behind it, the glyph grows and takes the accent instead
+                    scale: lit ? 1.12 : 1.0
 
-                    Behavior on color {
+                    Behavior on scale {
                         enabled: Config.animDuration > 0
-                        ColorAnimation {
-                            duration: Config.animDuration
+                        NumberAnimation {
+                            duration: Config.animDuration / 2
                             easing.type: Easing.OutCubic
                         }
                     }
+
+                    Button {
+                        id: controlsButton
+                        anchors.fill: parent
+                        flat: true
+                        hoverEnabled: true
+
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+
+                        contentItem: Text {
+                            text: Icons.gear
+                            font.family: Icons.font
+                            font.pixelSize: Styling.glyph
+                            font.weight: Font.Medium
+                            color: controlsButtonContainer.lit ? Colors.primary : Colors.overBackground
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+
+                            Behavior on color {
+                                enabled: Config.animDuration > 0
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                        }
+
+                        onClicked: GlobalShortcuts.toggleSettings()
+                    }
                 }
 
-                onClicked: GlobalShortcuts.toggleSettings()
-            }
-
-            // Power menu button (bottom-most)
-            StyledRect {
+            Item {
                 id: powerButtonContainer
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width
-                radius: Styling.radius(4)
-                variant: powerButton.hovered ? "focus" : "common"
-                z: -1
+                width: root.tabWidth
+                height: root.tabWidth
+
+                readonly property bool lit: powerButton.hovered || Visibilities.currentActiveModule === "powermenu"
+
+                scale: lit ? 1.12 : 1.0
+
+                Behavior on scale {
+                    enabled: Config.animDuration > 0
+                    NumberAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Button {
+                    id: powerButton
+                    anchors.fill: parent
+                    flat: true
+                    hoverEnabled: true
+
+                    background: Rectangle {
+                        color: "transparent"
+                    }
+
+                    contentItem: Text {
+                        text: Icons.shutdown
+                        font.family: Icons.font
+                        font.pixelSize: Styling.glyph
+                        font.weight: Font.Medium
+                        color: powerButtonContainer.lit ? Colors.primary : Colors.overBackground
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+
+                        Behavior on color {
+                            enabled: Config.animDuration > 0
+                            ColorAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+                    }
+
+                    onClicked: Visibilities.setActiveModule(Visibilities.currentActiveModule === "powermenu" ? "" : "powermenu")
+                }
             }
-
-            Button {
-                id: powerButton
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width
-                flat: true
-                hoverEnabled: true
-                z: 1
-
-                background: Rectangle {
-                    color: "transparent"
-                }
-
-                contentItem: Text {
-                    text: Icons.shutdown
-                    font.family: Icons.font
-                    font.pixelSize: 20
-                    font.weight: Font.Medium
-                    color: Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                onClicked: Visibilities.setActiveModule(Visibilities.currentActiveModule === "powermenu" ? "" : "powermenu")
             }
         }
 
         Separator {
-            width: 2
-            height: parent.height
-            vert: true
+            width: parent.width
+            height: 2
+            vert: false
         }
 
             // Content area
@@ -412,8 +426,8 @@ NotchAnimationBehavior {
 
             color: "transparent"
 
-            width: parent.width - root.tabWidth - 2 - 16 // Ancho total menos tabs, separador y spacings
-            height: parent.height
+            width: parent.width
+            height: parent.height - root.tabWidth - 2 - Styling.tight * 2
 
             clip: true
 

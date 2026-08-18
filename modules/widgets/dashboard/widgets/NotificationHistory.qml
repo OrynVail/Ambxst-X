@@ -79,7 +79,7 @@ Item {
 
         StyledRect {
             id: notificationPane
-            variant: "pane"
+            variant: "transparent"
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: Styling.radius(4)
@@ -92,33 +92,36 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.maximumHeight: 32
+                    Layout.maximumHeight: Styling.control
                     spacing: 4
 
                     StyledRect {
                         id: titleRect
-                        variant: "internalbg"
+                        variant: "transparent"
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Styling.radius(0)
 
+                        // Header label, not a button — left-aligned so it reads
+                        // as a section title rather than a filled tab
                         Text {
-                            anchors.centerIn: parent
+                            anchors.left: parent.left
+                            anchors.leftMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
                             text: "Notifications"
                             font.family: Config.defaultFont
                             font.pixelSize: Config.theme.fontSize
-                            font.weight: Font.Bold
+                            font.weight: Font.Medium
                             color: titleRect.item
-                            horizontalAlignment: Text.AlignHCenter
+                            opacity: 0.55
                         }
                     }
 
                     StyledRect {
                         id: dndToggle
-                        variant: Notifications.silent ? "primary" : (dndHover.containsMouse ? "focus" : "internalbg")
-                        Layout.preferredWidth: 32
+                        variant: Notifications.silent ? "primary" : (dndHover.containsMouse ? "focus" : "transparent")
+                        Layout.preferredWidth: Styling.control
                         Layout.fillHeight: true
-                        radius: Notifications.silent ? Styling.radius(-4) : Styling.radius(0)
+                        radius: height / 2
 
                         readonly property color dndItem: Notifications.silent ? itemColor : Styling.srItem("overprimary")
 
@@ -127,8 +130,9 @@ Item {
                             text: Notifications.silent ? Icons.bellZ : Icons.bell
                             textFormat: Text.RichText
                             font.family: Icons.font
-                            font.pixelSize: 18
+                            font.pixelSize: Styling.glyph
                             color: dndToggle.dndItem
+                            opacity: Notifications.silent || dndHover.containsMouse ? 1.0 : 0.55
                         }
 
                         MouseArea {
@@ -142,10 +146,10 @@ Item {
 
                     StyledRect {
                         id: clearButton
-                        variant: broomHover.pressed ? "error" : (broomHover.containsMouse ? "focus" : "internalbg")
-                        Layout.preferredWidth: 32
+                        variant: broomHover.pressed ? "error" : (broomHover.containsMouse ? "focus" : "transparent")
+                        Layout.preferredWidth: Styling.control
                         Layout.fillHeight: true
-                        radius: Styling.radius(0)
+                        radius: height / 2
 
                         readonly property color clearItem: broomHover.pressed ? itemColor : Styling.srItem("overerror")
 
@@ -154,8 +158,9 @@ Item {
                             text: Icons.broom
                             textFormat: Text.RichText
                             font.family: Icons.font
-                            font.pixelSize: 18
+                            font.pixelSize: Styling.glyph
                             color: clearButton.clearItem
+                            opacity: broomHover.containsMouse ? 1.0 : 0.55
                         }
 
                         MouseArea {

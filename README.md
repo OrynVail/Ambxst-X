@@ -1,131 +1,48 @@
-<p align="center">
-<img src="./assets/ambxst/ambxst-logo-color.svg" alt="Ambxst Logo" style="width: 50%;" align="center" />
-  <br>
-  <br>
-An <i><b>Ax</b>tremely</i> customizable shell.
-</p>
+# flokshell
+
+A Wayland shell for Hyprland, built on Quickshell. A hard fork of
+[Ambxst](https://github.com/Axenide/Ambxst).
+
+Named after my cat.
 
 ---
 
-<h2><sub><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Camera%20with%20Flash.png" alt="Camera with Flash" width="32" height="32" /></sub> Screenshots</h2>
+## Credit
 
-<div align="center">
-  <img src="./assets/screenshots/1.png" width="100%" />
+**Ambxst is [Axenide](https://github.com/Axenide)'s work, and it is most of what runs here.**
+The architecture, the reactive JSON configuration, the panel system, the lockscreen, the
+widgets — his. I did not have to reinvent this wheel because he had already made it, and made
+it well.
 
-</div>
+| | |
+|---|---|
+| Original project | **[Axenide/Ambxst](https://github.com/Axenide/Ambxst)** |
+| Author | **Adriano Tisera (Axenide)** — [GitHub](https://github.com/Axenide), [socials](https://zaap.bio/Axenide) |
+| Support him | **[Ko-fi](https://ko-fi.com/Axenide)** |
+| Community | **[Discord](https://axeni.de/discord)** |
+| Licence | **AGPL-3.0**, upstream copyright intact in [LICENSE](LICENSE) |
 
----
-
-<h2><sub><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Package.png" alt="Package" width="32" height="32" /></sub> Installation</h2>
-
-```bash
-curl -L get.axeni.de/ambxst | sh
-```
-
-This will install Ambxst and its dependencies. You will have the `ambxst` command available in your terminal, which you can use to start the shell.
-
-### Hyprland (more compositors coming soon!)
-
-1. Run the installation command above.
-
-2. Run `ambxst install hyprland` to add Ambxst's configuration to Hyprland. This will source a config file that applies Ambxst's settings. If you use `hyprland.lua`, or if no Hyprland config exists yet, it will look like this:
-
-```lua
--- Ambxst
-loadfile(os.getenv("HOME") .. "/.local/share/ambxst/hyprland.lua")()
-
--- OVERRIDES
--- Down here you can write or source anything that you want to override from Ambxst's settings.
-```
-
-If you only have `hyprland.conf`, Ambxst will keep using the legacy import there for compatibility:
-
-```bash
-# Ambxst
-source = ~/.local/share/ambxst/hyprland.conf
-
-# OVERRIDES
-# Down here you can write or source anything that you want to override from Ambxst's settings.
-```
-
-As stated, anything you want to override from Ambxst's settings should be written under the "OVERRIDES" section.
-
-3. Start Ambxst by running `ambxst` in your terminal. If you want to keep it running without having the terminal window open, you can run `ambxst & disown`. This will be only necessary for your first test run, as Ambxst will start automatically on login after step 2.
-
-Ambxst is currently supported on **Arch**, **Fedora**, and **NixOS**. This means both based and derivative distributions.
-
-> [!IMPORTANT]
-> The only pre-requisite is having Hyprland installed.
-
-> [!NOTE]
-> For NixOS users, the screen recording utility `gpu-screen-recorder` will only be able to use the `portal` backend until you add `programs.gpu-screen-recorder.enable = true;` to your `configuration.nix` or **home-manager**.
+**For what this shell is and how to install it, read [Ambxst's README](https://github.com/Axenide/Ambxst).**
+It is the better document, and it describes the thing that actually ships. Nothing is repeated
+here.
 
 ---
 
-## Will this change my config?
+## Why the fork
 
-Nope! Besides the Ambxst import block in your `hyprland.conf` or `hyprland.lua`, Ambxst is designed to be non-intrusive. It won't modify any of your existing configurations.
+Ambxst is built to be extremely customisable. That is the right goal for it and it is not mine.
 
----
-
-<h2><sub><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Activity/Sparkles.webp" alt="Sparkles" width="32" height="32" /></sub> Features</h2>
-
-- [x] Customizable components
-- [x] Themes
-- [x] System integration
-- [x] App launcher
-- [x] Clipboard manager
-- [x] Quick notes (and not so quick ones)
-- [x] Wallpaper manager
-- [x] Emoji picker
-- [x] [tmux](https://github.com/tmux/tmux) session manager
-- [x] System monitor
-- [x] Media control
-- [x] Notification system
-- [x] Wi-Fi manager
-- [x] Bluetooth manager
-- [x] Audio mixer
-- [x] [EasyEffects](https://github.com/wwmm/easyeffects) integration
-- [x] Screen capture
-- [x] Screen recording
-- [x] Color picker
-- [x] OCR
-- [x] QR and barcode scanner
-- [x] "Mirror" (webcam)
-- [x] Game mode
-- [x] Night mode
-- [x] Power profile manager
-- [x] AI Assistant
-- [x] Weather
-- [x] Calendar
-- [x] Power menu
-- [x] Workspace management
-- [x] Support for different layouts (dwindle, master, scrolling, etc.)
-- [x] Multi-monitor support
-- [x] Customizable keybindings
+I wanted one opinionated configuration instead of a preset library — so a hard fork was more
+honest than a pile of local overrides losing a fight with upstream on every pull. Gone so far:
+the AI integration, the bundled theme presets, and the config surface that existed to carry
+them. The design language is being replaced rather than re-skinned.
 
 ---
 
-## I need help!
+## Status
 
-If you are having trouble or have any questions:
-- You can ask anything on [Discord](https://discord.com/invite/gHG9WHyNvH) or in the [GitHub discussions](https://github.com/Axenide/Ambxst/discussions).
-- You can open an issue on the [GitHub repository](https://github.com/Axenide/Ambxst/issues).
-- The main configuration is located at `~/.config/ambxst`.
+In development, continuously, with no end state in view.
 
----
-
-## Credits
-- [outfoxxed](https://outfoxxed.me/) for creating Quickshell and great documentation!
-- [end-4](https://github.com/end-4) for his awesome projects. I learned a lot from them! (And *yoinked* a lot of code, too. 😅)
-- [soramane](https://github.com/soramanew) for helping me when I started with Quickshell. (You probably don't remember, but still, heh.)
-- [tr1x_em](https://trix.is-a.dev/) for being a great friend and helping me find great tools. You rock!
-- [Darsh](https://github.com/its-darsh) for not killing me when I left Fabric. u_u (Also for being a great friend and creating Fabric! Without Fabric, Ax-Shell wouldn't exist, so Ambxst wouldn't either. Thank you!)
-- [Mario](https://github.com/mariokhz) for being a great friend and showing me Quickshell!
-- [Samouly](https://samouly.is-a.dev/) for being Samouly. :3
-- [Brys](https://github.com/brys0) for being his continuous support and for being a great friend!
-- [Zen](https://github.com/wer-zen) for being a great friend and helping me when I started with Quickshell too!
-- [kh](https://www.youtube.com/watch?v=dQw4w9WgXcQ) for being an awesome human being and listening to my delusions about Ambxst. :D
-- And you, the user, for trying out Ambxst! You're awesome! 💖
-
-(If I forgot someone, please let me know. 🙏)
+There are no instructions here yet and that is deliberate. When this is far enough from upstream
+to deserve its own documentation it will get some. Until then it is for me, and Ambxst is the
+one to use.

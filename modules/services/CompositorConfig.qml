@@ -13,15 +13,40 @@ QtObject {
     property Process compositorProcess: Process {}
 
     property var currentAnimationConfig: null
+    property int animationsAttempts: 0
+
+    // The daemon is started by AxctlService at the same moment this first
+    // runs, so early reads land before its socket is bound and axctl prints a
+    // plain-text connection error to stdout. That is a race, not bad data —
+    // wait and ask again instead of parsing the error as JSON.
+    property Timer retryAnimationsTimer: Timer {
+        interval: 500
+        repeat: false
+        onTriggered: root.readAnimationsProcess.running = true
+    }
+
     property Process readAnimationsProcess: Process {
         command: ["axctl", "config", "get-animations"]
         stdout: StdioCollector {
             onStreamFinished: {
+                const raw = (text ?? "").trim();
+
+                if (raw === "" || !raw.startsWith("[")) {
+                    if (root.animationsAttempts < 10) {
+                        root.animationsAttempts++;
+                        root.retryAnimationsTimer.restart();
+                    } else {
+                        console.warn("CompositorConfig: gave up reading animations:", raw);
+                    }
+                    return;
+                }
+
                 try {
-                    const parsed = JSON.parse(text);
+                    const parsed = JSON.parse(raw);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         // axctl config get-animations returns [animations, beziers]
                         currentAnimationConfig = parsed;
+                        root.animationsAttempts = 0;
                     }
                 } catch (e) {
                     console.error("CompositorConfig: Error parsing animations:", e);

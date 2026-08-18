@@ -151,6 +151,16 @@ MouseArea {
         }
     }
 
+    // Circular chip on hover only — the icon otherwise sits bare on whatever
+    // surface is behind it.
+    StyledRect {
+        anchors.centerIn: parent
+        width: root.trayItemSize + 12
+        height: width
+        radius: height / 2
+        variant: root.isHovered ? "focus" : "transparent"
+    }
+
     IconImage {
         id: trayIcon
         source: {
@@ -164,6 +174,15 @@ MouseArea {
         width: parent.width
         height: parent.height
         smooth: true
+        opacity: root.isHovered ? 1.0 : 0.75
+
+        Behavior on opacity {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration / 2
+                easing.type: Easing.OutQuart
+            }
+        }
     }
 
     Tinted {

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Widgets
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
@@ -9,437 +8,318 @@ import qs.modules.theme
 import qs.modules.components
 import qs.modules.globals
 import qs.modules.services
-import qs.modules.widgets.tools
-import qs.modules.bar.systray
 import qs.config
 import "calendar"
 
+// Three columns on one surface divided by hairlines rather than nested cards.
+//
+// The five toggles sit directly on top of the calendar, which is what sets them
+// apart from every other control here — that grouping does the work a border
+// used to. The knobs keep the rail along the bottom. Nothing scrolls, so
+// nothing can be clipped out of sight.
 Rectangle {
+    id: root
     color: "transparent"
-    implicitWidth: 600
-    implicitHeight: 750
+    implicitWidth: 800
+    implicitHeight: 530
 
     property int leftPanelWidth: 0
 
-    RowLayout {
+    readonly property int gutter: Styling.gutter
+    readonly property int railHeight: Styling.control
+
+    readonly property int mediaWidth: 216     // the player card, disc plus breathing room
+    readonly property int calendarWidth: 263  // seven day cells, scaled to the body
+
+    // Five toggles spanning the calendar exactly, at its own spacing
+    readonly property int toggleSpacing: 4
+    readonly property int toggleSize: Math.round((calendarWidth - toggleSpacing * 4) / 5)
+
+    // Bar + gutter + knob comes to one media column, so the sound group sits
+    // under the player and the mic group mirrors it at the far edge
+    readonly property int sliderWidth: mediaWidth - gutter - railHeight
+
+    ColumnLayout {
         anchors.fill: parent
-        spacing: 8
+        spacing: 0
 
-        // Media card + widgets relocated off the bar
-        ColumnLayout {
-            id: leftColumn
-            // Nested layouts default to Layout.fillWidth: true, which would eat the
-            // whole row and squeeze the notification panel to nothing.
-            Layout.fillWidth: false
-            Layout.preferredWidth: 216
-            Layout.maximumWidth: 216
-            Layout.fillHeight: true
-            spacing: 8
-
-            FullPlayer {
-                Layout.fillWidth: true
-                Layout.preferredHeight: implicitHeight
-            }
-
-            // Tools inline rather than a button that opens a notch module.
-            // 4 x 44 + 3 x 8 = 200, exactly the 216 column less its padding.
-            StyledRect {
-                variant: "pane"
-                radius: Styling.radius(4)
-                Layout.fillWidth: true
-                Layout.preferredHeight: toolsGrid.implicitHeight + 16
-
-                ToolsMenu {
-                    id: toolsGrid
-                    anchors.centerIn: parent
-                    layout: "grid"
-                    columns: 4
-                    showSeparators: false
-                    buttonSize: 44
-                    iconSize: 20
-                    spacing: 8
-                }
-            }
-
-            // Absorbs the slack so the blocks above hold their position
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-            }
-        }
-
-        // Widgets column
-        ClippingRectangle {
-            id: widgetsContainer
-            Layout.preferredWidth: controlButtonsContainer.implicitWidth
-            Layout.fillHeight: true
-            radius: Styling.radius(4)
-            color: "transparent"
-
-            property bool circularControlDragging: false
-
-            Flickable {
-                id: widgetsFlickable
-                anchors.fill: parent
-                contentWidth: width
-                contentHeight: columnLayout.implicitHeight
-                clip: true
-                interactive: !widgetsContainer.circularControlDragging
-
-                ColumnLayout {
-                    id: columnLayout
-                    width: parent.width
-                    spacing: 8
-
-                    // Control buttons - 5 buttons wrapped in StyledRect pane > internalbg
-                    QuickControls {
-                        id: controlButtonsContainer
-                    }
-
-                    Calendar {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: width
-                    }
-
-                    // System tray, rehomed from the bar. Wider column than the
-                    // left, and it collapses when nothing is registered.
-                    StyledRect {
-                        id: trayPane
-                        variant: "pane"
-                        radius: Styling.radius(4)
-                        clip: true
-                        visible: tray.hasItems
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: visible ? tray.implicitHeight + 16 : 0
-
-                        // SysTray only reads bar.orientation
-                        QtObject {
-                            id: trayStub
-                            property string orientation: "horizontal"
-                            property string barPosition: "top"
-                        }
-
-                        SysTray {
-                            id: tray
-                            bar: trayStub
-                            anchors.centerIn: parent
-                            width: Math.min(implicitWidth, parent.width - 16)
-                            radius: Styling.radius(0)
-                        }
-                    }
-                }
-            }
-        }
-
-        // Notification History
-        NotificationHistory {
+        // ── Body ────────────────────────────────────────────────────────────
+        RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumWidth: 240
+            spacing: 0
+
+            // Now playing
+            FullPlayer {
+                Layout.fillWidth: false
+                Layout.preferredWidth: root.mediaWidth
+                Layout.maximumWidth: root.mediaWidth
+                Layout.fillHeight: true
+                Layout.rightMargin: root.gutter
+            }
+
+            Separator {
+                vert: true
+                Layout.fillHeight: true
+            }
+
+            // Toggles over the calendar
+            ColumnLayout {
+                Layout.fillWidth: false
+                Layout.preferredWidth: root.calendarWidth
+                Layout.maximumWidth: root.calendarWidth
+                Layout.fillHeight: true
+                Layout.leftMargin: root.gutter
+                Layout.rightMargin: root.gutter
+                spacing: Styling.tight
+
+                QuickControls {
+                    id: quickControls
+                    buttonSize: root.toggleSize
+                    spacing: root.toggleSpacing
+                    panelWidth: root.calendarWidth
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.toggleSize
+                    z: 2 // the drawer hangs over the calendar
+                }
+
+                // Takes the rest of the column — the grid scales to fit rather
+                // than sitting at a fixed height with slack beneath it
+                Calendar {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+            }
+
+            Separator {
+                vert: true
+                Layout.fillHeight: true
+            }
+
+            NotificationHistory {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.leftMargin: root.gutter
+            }
         }
 
-        // Circular controls column
-        ColumnLayout {
-            Layout.fillHeight: true
-            spacing: 8
+        Separator {
+            Layout.fillWidth: true
+            Layout.topMargin: Styling.tight
+        }
 
-            property bool circularControlDragging: false
 
-            // Brightness slider - vertical
-            ColumnLayout {
-                id: brightnessContainer
-                Layout.fillHeight: true
-                Layout.minimumHeight: 100
-                spacing: 8
+        // ── Control rail ────────────────────────────────────────────────────
+        // A band, not part of the column grid, so it does not inherit their
+        // widths. Sound on the left, mic mirrored on the right, brightness
+        // alone in the dead centre of the window. Each outer group is exactly
+        // one media column wide, so they sit under the player and the far edge.
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.railHeight
+            Layout.topMargin: Styling.tight
 
-                // Icon container with sync animation
-                Item {
-                    id: iconContainer
-                    Layout.preferredWidth: 48
-                    Layout.preferredHeight: 48
-                    Layout.alignment: Qt.AlignHCenter
+            // Sound: bar then knob
+            RowLayout {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: root.gutter
 
-                    property bool showingSyncFeedback: false
+                StyledSlider {
+                    id: volumeSlider
+                    // resizeParent false means it takes its size from the
+                    // layout; its own fillWidth default would stretch it
+                    resizeParent: false
+                    Layout.fillWidth: false
+                    Layout.preferredWidth: root.sliderWidth
+                    Layout.preferredHeight: root.railHeight
+                    Layout.alignment: Qt.AlignVCenter
+                    icon: ""
+                    iconClickable: false
+                    scroll: true
+                    smoothDrag: true
+                    progressColor: Audio.sink?.audio?.muted ? Colors.outline : Styling.srItem("overprimary")
 
-                    StyledRect {
-                        id: iconRect
-                        radius: Styling.radius(4)
-                        variant: {
-                            if (iconMouseArea.containsMouse && Brightness.syncBrightness)
-                                return "primaryfocus";
-                            if (Brightness.syncBrightness)
-                                return "primary";
-                            if (iconMouseArea.containsMouse)
-                                return "focus";
-                            return "pane";
-                        }
-                        anchors.fill: parent
+                    value: Audio.sink?.audio?.volume ?? 0
 
-                        Behavior on variant {
-                            enabled: Config.animDuration > 0
-                        }
+                    onValueChanged: {
+                        if (Audio.sink?.audio && Math.abs(Audio.sink.audio.volume - value) > 0.0001)
+                            Audio.sink.audio.volume = value;
+                    }
 
-                        Text {
-                            id: brightnessIcon
-                            anchors.centerIn: parent
-                            text: iconContainer.showingSyncFeedback ? Icons.sync : Icons.sun
-                            font.family: Icons.font
-                            font.pixelSize: 18
-                            color: Brightness.syncBrightness ? Styling.srItem("primary") : Colors.overBackground
-                            rotation: iconContainer.showingSyncFeedback ? syncIconRotation : brightnessIconRotation
-                            scale: iconContainer.showingSyncFeedback ? 1 : brightnessIconScale
-                            opacity: iconOpacity
-
-                            property real brightnessIconRotation: 0
-                            property real brightnessIconScale: 1
-                            property real iconOpacity: 1
-                            property real syncIconRotation: 0
-
-                            Behavior on text {
-                                enabled: Config.animDuration > 0
-                            }
-
-                            Behavior on color {
-                                enabled: Config.animDuration > 0
-                                ColorAnimation {
-                                    duration: Config.animDuration / 2
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-
-                            Behavior on opacity {
-                                enabled: Config.animDuration > 0
-                                NumberAnimation {
-                                    duration: 150
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-
-                            Behavior on rotation {
-                                enabled: Config.animDuration > 0
-                                NumberAnimation {
-                                    duration: 400
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-
-                            Behavior on scale {
-                                enabled: Config.animDuration > 0
-                                NumberAnimation {
-                                    duration: 400
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            id: iconMouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                let wasActive = Brightness.syncBrightness;
-                                Brightness.syncBrightness = !Brightness.syncBrightness;
-
-                                // Only show sync feedback animation when activating
-                                if (Brightness.syncBrightness) {
-                                    // Show sync icon instantly and start rotation
-                                    iconContainer.showingSyncFeedback = true;
-                                    brightnessIcon.iconOpacity = 1;
-                                    brightnessIcon.syncIconRotation = 0;
-                                    brightnessIcon.syncIconRotation = 360;
-
-                                    // Hold sync icon
-                                    syncHoldTimer.start();
-                                }
-                            }
-                            onWheel: wheel => {
-                                if (wheel.angleDelta.y > 0) {
-                                    brightnessSlider.value = Math.min(1, brightnessSlider.value + 0.1);
-                                } else {
-                                    brightnessSlider.value = Math.max(0, brightnessSlider.value - 0.1);
-                                }
-                            }
-                        }
-
-                        Timer {
-                            id: syncHoldTimer
-                            interval: 600
-                            onTriggered: {
-                                brightnessIcon.iconOpacity = 0;
-                                syncFadeOutTimer.start();
-                            }
-                        }
-
-                        Timer {
-                            id: syncFadeOutTimer
-                            interval: 150
-                            onTriggered: {
-                                iconContainer.showingSyncFeedback = false;
-                                brightnessIcon.iconOpacity = 1;
-                                brightnessIcon.syncIconRotation = 0; // Reset rotation
-                            }
+                    // The slider assigns its own value while dragging, which
+                    // breaks the binding above — put it back when the sink
+                    // moves from anywhere else.
+                    Connections {
+                        target: Audio.sink?.audio ?? null
+                        ignoreUnknownSignals: true
+                        function onVolumeChanged() {
+                            if (!volumeSlider.isDragging)
+                                volumeSlider.value = Audio.sink.audio.volume;
                         }
                     }
                 }
 
-                // Slider
-                Item {
-                    Layout.preferredWidth: 48
-                    Layout.fillHeight: true
-                    Layout.alignment: Qt.AlignHCenter
+                CircularControl {
+                    id: volumeControl
+                    flat: true
+                    Layout.preferredWidth: root.railHeight
+                    Layout.preferredHeight: root.railHeight
+                    Layout.alignment: Qt.AlignVCenter
 
-                    StyledSlider {
-                        id: brightnessSlider
-                        anchors.fill: parent
-                        anchors.margins: 0
-                        vertical: true
-                        smoothDrag: true
-                        value: brightnessValue
-                        resizeParent: false
-                        wavy: false
-                        scroll: true
-                        iconClickable: false
-                        sliderVisible: true
-                        iconPos: "start"
-                        icon: ""
-                        progressColor: Styling.srItem("overprimary")
+                    icon: {
+                        if (Audio.sink?.audio?.muted)
+                            return Icons.speakerSlash;
+                        const vol = Audio.sink?.audio?.volume ?? 0;
+                        if (vol < 0.01)
+                            return Icons.speakerX;
+                        if (vol < 0.19)
+                            return Icons.speakerNone;
+                        if (vol < 0.49)
+                            return Icons.speakerLow;
+                        return Icons.speakerHigh;
+                    }
+                    value: Audio.sink?.audio?.volume ?? 0
+                    accentColor: Audio.sink?.audio?.muted ? Colors.outline : Styling.srItem("overprimary")
+                    isToggleable: true
+                    isToggled: !(Audio.sink?.audio?.muted ?? false)
 
-                        property real brightnessValue: 0
-                        property var currentMonitor: {
-                            if (Brightness.monitors.length > 0) {
-                                let focusedName = AxctlService.focusedMonitor?.name ?? "";
-                                let found = null;
-                                for (let i = 0; i < Brightness.monitors.length; i++) {
-                                    let mon = Brightness.monitors[i];
-                                    if (mon && mon.screen && mon.screen.name === focusedName) {
-                                        found = mon;
-                                        break;
-                                    }
-                                }
-                                return found || Brightness.monitors[0];
-                            }
-                            return null;
-                        }
+                    onControlValueChanged: newValue => {
+                        if (Audio.sink?.audio)
+                            Audio.sink.audio.volume = newValue;
+                    }
 
-                        Component.onCompleted: {
-                            if (currentMonitor && currentMonitor.ready) {
-                                brightnessValue = currentMonitor.brightness;
-                                brightnessIcon.brightnessIconRotation = (brightnessValue / 1.0) * 180;
-                                brightnessIcon.brightnessIconScale = 0.8 + (brightnessValue / 1.0) * 0.2;
-                            }
-                        }
-
-                        onValueChanged: {
-                            brightnessValue = value;
-                            brightnessIcon.brightnessIconRotation = (value / 1.0) * 180;
-                            brightnessIcon.brightnessIconScale = 0.8 + (value / 1.0) * 0.2;
-
-                            if (Brightness.syncBrightness) {
-                                // Sync all monitors
-                                for (let i = 0; i < Brightness.monitors.length; i++) {
-                                    let mon = Brightness.monitors[i];
-                                    if (mon && mon.ready) {
-                                        mon.setBrightness(value);
-                                    }
-                                }
-                            } else {
-                                // Only current monitor
-                                if (currentMonitor && currentMonitor.ready) {
-                                    currentMonitor.setBrightness(value);
-                                }
-                            }
-                        }
-
-                        onIsDraggingChanged: {
-                            brightnessContainer.parent.circularControlDragging = isDragging;
-                        }
-
-                        Connections {
-                            target: brightnessSlider.currentMonitor
-                            ignoreUnknownSignals: true
-                            function onBrightnessChanged() {
-                                if (brightnessSlider.currentMonitor && brightnessSlider.currentMonitor.ready && !brightnessSlider.isDragging) {
-                                    brightnessSlider.brightnessValue = brightnessSlider.currentMonitor.brightness;
-                                    brightnessIcon.brightnessIconRotation = (brightnessSlider.brightnessValue / 1.0) * 180;
-                                    brightnessIcon.brightnessIconScale = 0.8 + (brightnessSlider.brightnessValue / 1.0) * 0.2;
-                                }
-                            }
-                            function onReadyChanged() {
-                                if (brightnessSlider.currentMonitor && brightnessSlider.currentMonitor.ready) {
-                                    brightnessSlider.brightnessValue = brightnessSlider.currentMonitor.brightness;
-                                    brightnessIcon.brightnessIconRotation = (brightnessSlider.brightnessValue / 1.0) * 180;
-                                    brightnessIcon.brightnessIconScale = 0.8 + (brightnessSlider.brightnessValue / 1.0) * 0.2;
-                                }
-                            }
-                        }
+                    onToggled: {
+                        if (Audio.sink?.audio)
+                            Audio.sink.audio.muted = !Audio.sink.audio.muted;
                     }
                 }
             }
 
+            // Brightness: knob only, dead centre of the window
             CircularControl {
-                id: volumeControl
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: 48
-                Layout.preferredHeight: 48
-                icon: {
-                    if (Audio.sink?.audio?.muted)
-                        return Icons.speakerSlash;
-                    const vol = Audio.sink?.audio?.volume ?? 0;
-                    if (vol < 0.01)
-                        return Icons.speakerX;
-                    if (vol < 0.19)
-                        return Icons.speakerNone;
-                    if (vol < 0.49)
-                        return Icons.speakerLow;
-                    return Icons.speakerHigh;
-                }
-                value: Audio.sink?.audio?.volume ?? 0
-                accentColor: Audio.sink?.audio?.muted ? Colors.outline : Styling.srItem("overprimary")
+                id: brightnessControl
+                flat: true
+                width: root.railHeight
+                height: root.railHeight
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+
+                icon: Icons.sun
+                value: brightnessValue
+                accentColor: Styling.srItem("overprimary")
                 isToggleable: true
-                isToggled: !(Audio.sink?.audio?.muted ?? false)
+                isToggled: Brightness.syncBrightness
+
+                property real brightnessValue: 0
+                property var currentMonitor: {
+                    if (Brightness.monitors.length > 0) {
+                        let focusedName = AxctlService.focusedMonitor?.name ?? "";
+                        let found = null;
+                        for (let i = 0; i < Brightness.monitors.length; i++) {
+                            let mon = Brightness.monitors[i];
+                            if (mon && mon.screen && mon.screen.name === focusedName) {
+                                found = mon;
+                                break;
+                            }
+                        }
+                        return found || Brightness.monitors[0];
+                    }
+                    return null;
+                }
+
+                Component.onCompleted: {
+                    if (currentMonitor && currentMonitor.ready)
+                        brightnessValue = currentMonitor.brightness;
+                }
+
+                // Mirrors brightness across every monitor, as it did before
+                onToggled: Brightness.syncBrightness = !Brightness.syncBrightness
 
                 onControlValueChanged: newValue => {
-                    if (Audio.sink?.audio) {
-                        Audio.sink.audio.volume = newValue;
+                    brightnessValue = newValue;
+                    if (Brightness.syncBrightness) {
+                        for (let i = 0; i < Brightness.monitors.length; i++) {
+                            let mon = Brightness.monitors[i];
+                            if (mon && mon.ready)
+                                mon.setBrightness(newValue);
+                        }
+                    } else if (currentMonitor && currentMonitor.ready) {
+                        currentMonitor.setBrightness(newValue);
                     }
                 }
 
-                onDraggingChanged: isDragging => {
-                    parent.circularControlDragging = isDragging;
-                }
-
-                onToggled: {
-                    if (Audio.sink?.audio) {
-                        Audio.sink.audio.muted = !Audio.sink.audio.muted;
+                Connections {
+                    target: brightnessControl.currentMonitor
+                    ignoreUnknownSignals: true
+                    function onBrightnessChanged() {
+                        if (brightnessControl.currentMonitor && brightnessControl.currentMonitor.ready)
+                            brightnessControl.brightnessValue = brightnessControl.currentMonitor.brightness;
+                    }
+                    function onReadyChanged() {
+                        if (brightnessControl.currentMonitor && brightnessControl.currentMonitor.ready)
+                            brightnessControl.brightnessValue = brightnessControl.currentMonitor.brightness;
                     }
                 }
             }
 
-            CircularControl {
-                id: micControl
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: 48
-                Layout.preferredHeight: 48
-                icon: Audio.source?.audio?.muted ? Icons.micSlash : Icons.mic
-                value: Audio.source?.audio?.volume ?? 0
-                accentColor: Audio.source?.audio?.muted ? Colors.outline : Styling.srItem("overprimary")
-                isToggleable: true
-                isToggled: !(Audio.source?.audio?.muted ?? false)
+            // Mic: knob then bar, mirroring the sound group
+            RowLayout {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: root.gutter
 
-                onControlValueChanged: newValue => {
-                    if (Audio.source?.audio) {
-                        Audio.source.audio.volume = newValue;
+                CircularControl {
+                    id: micControl
+                    flat: true
+                    Layout.preferredWidth: root.railHeight
+                    Layout.preferredHeight: root.railHeight
+                    Layout.alignment: Qt.AlignVCenter
+
+                    icon: Audio.source?.audio?.muted ? Icons.micSlash : Icons.mic
+                    value: Audio.source?.audio?.volume ?? 0
+                    accentColor: Audio.source?.audio?.muted ? Colors.outline : Styling.srItem("overprimary")
+                    isToggleable: true
+                    isToggled: !(Audio.source?.audio?.muted ?? false)
+
+                    onControlValueChanged: newValue => {
+                        if (Audio.source?.audio)
+                            Audio.source.audio.volume = newValue;
+                    }
+
+                    onToggled: {
+                        if (Audio.source?.audio)
+                            Audio.source.audio.muted = !Audio.source.audio.muted;
                     }
                 }
 
-                onDraggingChanged: isDragging => {
-                    parent.circularControlDragging = isDragging;
-                }
+                StyledSlider {
+                    id: micSlider
+                    resizeParent: false
+                    Layout.fillWidth: false
+                    Layout.preferredWidth: root.sliderWidth
+                    Layout.preferredHeight: root.railHeight
+                    Layout.alignment: Qt.AlignVCenter
+                    icon: ""
+                    iconClickable: false
+                    scroll: true
+                    smoothDrag: true
+                    progressColor: Audio.source?.audio?.muted ? Colors.outline : Styling.srItem("overprimary")
 
-                onToggled: {
-                    if (Audio.source?.audio) {
-                        Audio.source.audio.muted = !Audio.source.audio.muted;
+                    value: Audio.source?.audio?.volume ?? 0
+
+                    onValueChanged: {
+                        if (Audio.source?.audio && Math.abs(Audio.source.audio.volume - value) > 0.0001)
+                            Audio.source.audio.volume = value;
+                    }
+
+                    Connections {
+                        target: Audio.source?.audio ?? null
+                        ignoreUnknownSignals: true
+                        function onVolumeChanged() {
+                            if (!micSlider.isDragging)
+                                micSlider.value = Audio.source.audio.volume;
+                        }
                     }
                 }
             }

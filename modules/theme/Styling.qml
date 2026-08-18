@@ -5,6 +5,14 @@ import qs.config
 QtObject {
     readonly property string defaultFont: Config.defaultFont
 
+    // Layout tokens. One pressable size for everything — tabs, tools, toggles,
+    // knobs — so a band is simply "one control tall" and nothing needs deciding
+    // case by case.
+    readonly property int control: 36
+    readonly property int glyph: 20
+    readonly property int gutter: 12
+    readonly property int tight: 8
+
     function radius(offset) {
         return Config.roundness > 0 ? Math.max(Config.roundness + offset, 0) : 0;
     }

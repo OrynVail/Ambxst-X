@@ -775,7 +775,7 @@ Item {
 
                         NumberInputRow {
                             label: "Hover Region Height"
-                            value: Config.notch.hoverRegionHeight ?? 8
+                            value: Config.notch.hoverRegionHeight ?? 16
                             minValue: 0
                             maxValue: 32
                             suffix: "px"
@@ -789,7 +789,7 @@ Item {
 
                         ToggleRow {
                             label: "Keep Hidden"
-                            checked: Config.notch.keepHidden ?? false
+                            checked: Config.notch.keepHidden ?? true
                             onToggled: value => {
                                 if (value !== Config.notch.keepHidden) {
                                     GlobalStates.markShellChanged();
@@ -812,7 +812,7 @@ Item {
 
                         ToggleRow {
                             label: "Logo Tint"
-                            checked: Config.notch.logoTint ?? true
+                            checked: Config.notch.logoTint ?? false
                             onToggled: value => {
                                 if (value !== Config.notch.logoTint) {
                                     GlobalStates.markShellChanged();
@@ -823,7 +823,7 @@ Item {
 
                         ToggleRow {
                             label: "Logo Full Tint"
-                            checked: Config.notch.logoFullTint ?? true
+                            checked: Config.notch.logoFullTint ?? false
                             onToggled: value => {
                                 if (value !== Config.notch.logoFullTint) {
                                     GlobalStates.markShellChanged();
@@ -834,7 +834,7 @@ Item {
 
                         NumberInputRow {
                             label: "Logo Size"
-                            value: Config.notch.logoSize ?? 28
+                            value: Config.notch.logoSize ?? 23
                             minValue: 12
                             maxValue: 64
                             suffix: "px"
@@ -848,7 +848,7 @@ Item {
 
                         ToggleRow {
                             label: "Reserve Space"
-                            checked: Config.notch.reserveSpace ?? true
+                            checked: Config.notch.reserveSpace ?? false
                             onToggled: value => {
                                 if (value !== Config.notch.reserveSpace) {
                                     GlobalStates.markShellChanged();
@@ -881,7 +881,7 @@ Item {
 
                         ToggleRow {
                             label: "Available on Fullscreen"
-                            checked: Config.notch.availableOnFullscreen ?? false
+                            checked: Config.notch.availableOnFullscreen ?? true
                             onToggled: value => {
                                 if (value !== Config.notch.availableOnFullscreen) {
                                     GlobalStates.markShellChanged();
@@ -892,7 +892,7 @@ Item {
 
                         ToggleRow {
                             label: "Disable Hover Expansion"
-                            checked: Config.notch.disableHoverExpansion ?? true
+                            checked: Config.notch.disableHoverExpansion ?? false
                             onToggled: value => {
                                 if (value !== Config.notch.disableHoverExpansion) {
                                     GlobalStates.markShellChanged();
@@ -927,7 +927,7 @@ Item {
 
                         NumberInputRow {
                             label: "Shown"
-                            value: Config.workspaces.shown ?? 10
+                            value: Config.workspaces.shown ?? 9
                             minValue: 1
                             maxValue: 20
                             onValueEdited: newValue => {
@@ -940,7 +940,7 @@ Item {
 
                         ToggleRow {
                             label: "Show App Icons"
-                            checked: Config.workspaces.showAppIcons ?? true
+                            checked: Config.workspaces.showAppIcons ?? false
                             onToggled: value => {
                                 if (value !== Config.workspaces.showAppIcons) {
                                     GlobalStates.markShellChanged();
@@ -1302,7 +1302,7 @@ Item {
                         ToggleRow {
                             label: "Available on Fullscreen"
                             visible: (Config.dock.theme ?? "default") !== "integrated"
-                            checked: Config.dock.availableOnFullscreen ?? false
+                            checked: Config.dock.availableOnFullscreen ?? true
                             onToggled: value => {
                                 if (value !== Config.dock.availableOnFullscreen) {
                                     GlobalStates.markShellChanged();

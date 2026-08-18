@@ -1,7 +1,7 @@
 .pragma library
 
 var data = {
-    "enabled": true,
+    "enabled": false,
     "theme": "default",
     "position": "bottom",
     "height": 48,
@@ -11,7 +11,7 @@ var data = {
     "hoverRegionHeight": 16,
     "pinnedOnStartup": false,
     "hoverToReveal": true,
-    "availableOnFullscreen": false,
+    "availableOnFullscreen": true,
     "showRunningIndicators": true,
     "showPinButton": true,
     "showOverviewButton": true,

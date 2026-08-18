@@ -6,6 +6,7 @@ import qs.modules.notch
 import qs.modules.components
 import qs.modules.bar
 import qs.modules.bar.clock
+import qs.modules.bar.systray
 import qs.config
 
 Item {
@@ -113,6 +114,14 @@ Item {
                 bar: notchBarStub
                 flat: true
                 layerEnabled: false
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            // Collapses to nothing when empty, so the notch keeps its minimal
+            // width until something actually docks there
+            SysTray {
+                id: tray
+                bar: notchBarStub
                 Layout.alignment: Qt.AlignVCenter
             }
 
