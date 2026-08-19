@@ -207,6 +207,7 @@ Item {
                             id: groupSmallAppIcon
                             Layout.preferredWidth: 16
                             Layout.preferredHeight: 16
+                            sourceSize: Qt.size(16, 16)
                             source: (notificationGroup && notificationGroup.appIcon !== "") ? "image://icon/" + notificationGroup.appIcon : ""
                             fillMode: Image.PreserveAspectFit
                             smooth: true

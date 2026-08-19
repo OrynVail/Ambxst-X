@@ -137,6 +137,7 @@ Button {
                     source: root.iconSource
                     fillMode: Image.PreserveAspectFit
                     mipmap: true
+                    sourceSize: Qt.size(16, 16)
                 }
             }
         }

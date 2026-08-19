@@ -408,6 +408,7 @@ WlSessionLockSurface {
                         id: userAvatar
                         anchors.fill: parent
                         source: `file://${Quickshell.env("HOME")}/.face.icon`
+                        sourceSize: Qt.size(64, 64)
                         fillMode: Image.PreserveAspectCrop
                         smooth: true
                         asynchronous: true

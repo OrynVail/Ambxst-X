@@ -135,6 +135,10 @@ Item {
                             sectionId: "performance"
                         }
                         SectionButton {
+                            text: "Media"
+                            sectionId: "media"
+                        }
+                        SectionButton {
                             text: "System Resources"
                             sectionId: "system"
                         }
@@ -428,6 +432,83 @@ Item {
                             checked: !Config.performance.rotateCoverArt
                             onToggled: checked => {
                                 Config.performance.rotateCoverArt = !checked;
+                            }
+                        }
+                    }
+
+                    // =====================
+                    // MEDIA SECTION
+                    // =====================
+                    ColumnLayout {
+                        visible: root.currentSection === "media"
+                        property string settingsSection: "media"
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: "Cover Art"
+                            font.family: Config.theme.font
+                            font.pixelSize: Styling.fontSize(-1)
+                            font.weight: Font.Medium
+                            color: Colors.overSurfaceVariant
+                            Layout.bottomMargin: -4
+                        }
+
+                        Text {
+                            text: "Where the player looks for artwork when a source ships none"
+                            font.family: Config.theme.font
+                            font.pixelSize: Styling.fontSize(-2)
+                            color: Colors.overSurfaceVariant
+                            opacity: 0.7
+                        }
+
+                        ToggleRow {
+                            Layout.fillWidth: true
+                            label: "Read Embedded Art"
+                            description: "Pull covers out of local files and folders"
+                            checked: Config.media.coverArtEmbedded
+                            onToggled: checked => {
+                                Config.media.coverArtEmbedded = checked;
+                            }
+                        }
+
+                        ToggleRow {
+                            Layout.fillWidth: true
+                            label: "Look Up Art Online"
+                            description: "Search Deezer and iTunes when nothing local matches"
+                            checked: Config.media.coverArtOnline
+                            onToggled: checked => {
+                                Config.media.coverArtOnline = checked;
+                            }
+                        }
+
+                        ToggleRow {
+                            Layout.fillWidth: true
+                            label: "Fall Back To Wallpaper"
+                            description: "Otherwise the app icon stands in for missing art"
+                            checked: Config.media.coverArtFallback === "wallpaper"
+                            onToggled: checked => {
+                                Config.media.coverArtFallback = checked ? "wallpaper" : "appIcon";
+                            }
+                        }
+
+                        Text {
+                            text: "Players"
+                            font.family: Config.theme.font
+                            font.pixelSize: Styling.fontSize(-1)
+                            font.weight: Font.Medium
+                            color: Colors.overSurfaceVariant
+                            Layout.topMargin: 8
+                            Layout.bottomMargin: -4
+                        }
+
+                        ToggleRow {
+                            Layout.fillWidth: true
+                            label: "Firefox Player"
+                            description: "The only browser that publishes artwork, and it registers one player per tab"
+                            checked: Config.media.enableFirefoxPlayer
+                            onToggled: checked => {
+                                Config.media.enableFirefoxPlayer = checked;
                             }
                         }
                     }

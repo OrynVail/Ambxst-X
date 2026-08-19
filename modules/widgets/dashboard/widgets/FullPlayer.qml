@@ -27,13 +27,7 @@ StyledRect {
     property bool isPlaying: MprisController.activePlayer?.playbackState === MprisPlaybackState.Playing
     property real position: MprisController.activePlayer?.position ?? 0.0
     property real length: MprisController.activePlayer?.length ?? 1.0
-    property bool hasArtwork: (MprisController.activePlayer?.trackArtUrl ?? "") !== ""
-    property string wallpaperPath: {
-        if (!GlobalStates.wallpaperManager) return "";
-        let path = GlobalStates.wallpaperManager.currentWallpaper;
-        let frame = GlobalStates.wallpaperManager.getLockscreenFramePath(path);
-        return frame ? "file://" + frame : "";
-    }
+    property bool hasArtwork: CoverArtService.hasArt
     property bool hasActivePlayer: MprisController.activePlayer !== null
     property bool isSeeking: false
 
@@ -111,7 +105,7 @@ StyledRect {
         mipmap: true
         id: backgroundArtBlurred
         anchors.fill: parent
-        source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : player.wallpaperPath
+        source: player.hasArtwork ? CoverArtService.source : ""
         sourceSize: Qt.size(64, 64)
         fillMode: Image.PreserveAspectCrop
         visible: false
@@ -125,8 +119,8 @@ StyledRect {
         blurEnabled: true
         blurMax: 32
         blur: 1.0
-        opacity: (player.hasArtwork || player.wallpaperPath !== "") ? 0.25 : 0.0
-        visible: player.hasArtwork || player.wallpaperPath !== ""
+        opacity: player.hasArtwork ? 0.25 : 0.0
+        visible: player.hasArtwork
         Behavior on opacity {
             enabled: Config.animDuration > 0
             NumberAnimation {
@@ -140,7 +134,8 @@ StyledRect {
         mipmap: true
         id: backgroundArtFull
         anchors.fill: parent
-        source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : player.wallpaperPath
+        source: player.hasArtwork ? CoverArtService.source : ""
+        sourceSize: Qt.size(512, 512)
         fillMode: Image.PreserveAspectCrop
         visible: false
         asynchronous: true
@@ -155,8 +150,8 @@ StyledRect {
         maskInverted: true
         maskThresholdMin: 0.5
         maskSpreadAtMin: 1.0
-        opacity: (player.hasArtwork || player.wallpaperPath !== "") ? 1.0 : 0.0
-        visible: player.hasArtwork || player.wallpaperPath !== ""
+        opacity: player.hasArtwork ? 1.0 : 0.0
+        visible: player.hasArtwork
         Behavior on opacity {
             enabled: Config.animDuration > 0
             NumberAnimation {
@@ -246,16 +241,16 @@ StyledRect {
                         mipmap: true
                         id: coverArt
                         anchors.fill: parent
-                        source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : player.wallpaperPath
+                        source: CoverArtService.source
                         sourceSize: Qt.size(256, 256)
-                        fillMode: Image.PreserveAspectCrop
+                        fillMode: CoverArtService.usingFallback ? Image.PreserveAspectFit : Image.PreserveAspectCrop
                         asynchronous: true
 
                         // Placeholder for a track with no art
                         Rectangle {
                             anchors.fill: parent
                             color: Colors.surface
-                            visible: !player.hasArtwork && player.wallpaperPath === ""
+                            visible: CoverArtService.showPlaceholder
                         }
                     }
                 }

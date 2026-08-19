@@ -80,6 +80,7 @@ Item {
                 id: appIconImage
                 anchors.fill: parent
                 source: root.appIcon ? "image://icon/" + root.appIcon : ""
+                sourceSize: Qt.size(width, height)
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
             }
@@ -104,6 +105,7 @@ Item {
                         id: notifImage
                         anchors.fill: parent
                         source: status === Image.Error && root.appIcon ? "image://icon/" + root.appIcon : root.image
+                        sourceSize: Qt.size(width, height)
                         fillMode: Image.PreserveAspectCrop
                         smooth: true
                         onStatusChanged: {
@@ -132,6 +134,7 @@ Item {
                 mipmap: true
                 anchors.fill: parent
                 source: root.appIcon ? "image://icon/" + root.appIcon : ""
+                sourceSize: Qt.size(width, height)
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
             }

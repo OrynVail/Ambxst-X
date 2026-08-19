@@ -739,6 +739,7 @@ Rectangle {
                                 id: appIconImage
                                 anchors.fill: parent
                                 source: "image://icon/" + appIcon
+                                sourceSize: Qt.size(32, 32)
                                 fillMode: Image.PreserveAspectFit
                                 
                                 onStatusChanged: {

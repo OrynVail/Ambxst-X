@@ -2453,6 +2453,7 @@ Item {
                         mipmap: true
                         id: previewImage
                         anchors.fill: parent
+                        sourceSize: Qt.size(width, height)
                         fillMode: Image.PreserveAspectFit
                         visible: previewPanel.currentItem && (previewPanel.currentItem.isImage || isImageFile) && !isGifImage
                         source: {
@@ -2733,6 +2734,7 @@ Item {
                                             id: videoThumbnail
                                             anchors.fill: parent
                                             source: root.linkPreviewData && root.linkPreviewData.image ? root.linkPreviewData.image : ""
+                                            sourceSize: Qt.size(width, height)
                                             fillMode: Image.PreserveAspectCrop
                                             asynchronous: true
                                             cache: true
@@ -2935,6 +2937,7 @@ Item {
                                             mipmap: true
                                             anchors.fill: parent
                                             source: root.linkPreviewData && root.linkPreviewData.image ? root.linkPreviewData.image : ""
+                                            sourceSize: Qt.size(width, height)
                                             fillMode: Image.PreserveAspectCrop
                                             asynchronous: true
                                             cache: true
@@ -3051,6 +3054,7 @@ Item {
                                                 anchors.centerIn: parent
                                                 width: 24
                                                 height: 24
+                                                sourceSize: Qt.size(24, 24)
                                                 visible: previewPanel.currentItem !== null && status === Image.Ready
                                                 fillMode: Image.PreserveAspectFit
                                                 asynchronous: true

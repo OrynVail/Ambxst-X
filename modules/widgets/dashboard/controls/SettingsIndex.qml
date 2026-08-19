@@ -100,6 +100,13 @@ QtObject {
         { label: "Window Preview", keywords: "thumbnail overview alt-tab", section: 6, subSection: "performance", subLabel: "System > Performance", icon: Icons.windowsLogo, isIcon: true },
         { label: "Wavy Line", keywords: "animated wave effect performance", section: 6, subSection: "performance", subLabel: "System > Performance", icon: Icons.lightning, isIcon: true },
         
+        // System > Media
+        { label: "Media", keywords: "player music cover art mpris", section: 6, subSection: "media", subLabel: "System > Media", icon: Icons.player, isIcon: true },
+        { label: "Read Embedded Art", keywords: "cover album tags local files", section: 6, subSection: "media", subLabel: "System > Media", icon: Icons.image, isIcon: true },
+        { label: "Look Up Art Online", keywords: "cover album deezer itunes network", section: 6, subSection: "media", subLabel: "System > Media", icon: Icons.image, isIcon: true },
+        { label: "Fall Back To Wallpaper", keywords: "cover art missing app icon", section: 6, subSection: "media", subLabel: "System > Media", icon: Icons.image, isIcon: true },
+        { label: "Firefox Player", keywords: "browser mpris artwork tabs", section: 6, subSection: "media", subLabel: "System > Media", icon: Icons.player, isIcon: true },
+
         // System > Resources
         { label: "System Resources", keywords: "cpu ram memory usage monitor", section: 6, subSection: "resources", subLabel: "System > Resources", icon: Icons.circuitry, isIcon: true },
         

@@ -146,6 +146,7 @@ Item {
                 }
                 return "image://icon/" + root.itemIcon;
             }
+            sourceSize: Qt.size(Config.desktop.iconSize, Config.desktop.iconSize)
             fillMode: Image.PreserveAspectFit
             asynchronous: true
             smooth: true
@@ -190,6 +191,7 @@ Item {
                     }
                     return "image://icon/" + root.itemIcon;
                 }
+                sourceSize: Qt.size(Config.desktop.iconSize, Config.desktop.iconSize)
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 smooth: true

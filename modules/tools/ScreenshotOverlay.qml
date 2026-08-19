@@ -124,6 +124,7 @@ PanelWindow {
                 id: img
                 anchors.fill: parent
                 source: root.imagePath !== "" ? "file://" + root.imagePath : ""
+                sourceSize: Qt.size(width, height)
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
 

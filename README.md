@@ -34,8 +34,36 @@ Ambxst is built to be extremely customisable. That is the right goal for it and 
 
 I wanted one opinionated configuration instead of a preset library — so a hard fork was more
 honest than a pile of local overrides losing a fight with upstream on every pull. Gone so far:
-the AI integration, the bundled theme presets, and the config surface that existed to carry
-them. The design language is being replaced rather than re-skinned.
+the AI integration and its sidebar, the bundled theme presets, the bar, the duplicate media
+players, and the config surface that existed to carry all of it. The design language is being
+replaced rather than re-skinned.
+
+---
+
+## Weight
+
+It does less, so it holds less.
+
+| | Ambxst 1.1.5 | flokshell |
+|---|---|---|
+| QML files | 216 | 181 |
+| Lines of QML | 78,160 | 66,397 |
+
+Three inefficiencies upstream still carries are fixed here. None of them change behaviour:
+
+- The notch built its dashboard, launcher, powermenu and tools views on first open and never
+  released them — per monitor. They are released now once closed.
+- Seventeen images decoded at full source resolution to fill much smaller items. A 2560×1440
+  image costs 14.7 MB of memory whether or not you can see it at that size.
+- Every config property change rewrote a whole JSON file atomically. Dragging one slider was a
+  file rewrite per frame. Writes coalesce now.
+
+Idle footprint went from 601 MB resident to 510 MB, and 411 MB private dirty to 326 MB, on two
+monitors with nothing open.
+
+I have not benchmarked Ambxst, so there is no honest speed figure to quote against it. Those
+numbers are this shell before and after, one sample each, on my machine. The three fixes are
+things I read in upstream's source, not things I measured it doing.
 
 ---
 

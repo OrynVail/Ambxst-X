@@ -167,6 +167,45 @@ Item {
         sourceComponent: Component { ToolsMenuView { visible: false } }
     }
 
+    // Views outlive a close so reopening is instant, but not indefinitely.
+    function releaseIdleViews() {
+        // Still on screen, or mid pop animation.
+        if (notchContainer.stackView.depth > 1) {
+            viewReaper.restart();
+            return;
+        }
+        if (!screenVisibilities.launcher)
+            persistentLauncherViewLoader.active = false;
+        if (!screenVisibilities.dashboard)
+            persistentDashboardViewLoader.active = false;
+        if (!screenVisibilities.powermenu)
+            persistentPowerMenuViewLoader.active = false;
+        if (!screenVisibilities.tools)
+            persistentToolsMenuViewLoader.active = false;
+    }
+
+    Timer {
+        id: viewReaper
+        interval: 60000
+        repeat: false
+        onTriggered: root.releaseIdleViews()
+    }
+
+    // An unfocused screen does not wait out the full idle window.
+    Timer {
+        id: unfocusedReaper
+        interval: 5000
+        repeat: false
+        onTriggered: root.releaseIdleViews()
+    }
+
+    onIsScreenFocusedChanged: {
+        if (!root.isScreenFocused)
+            unfocusedReaper.restart();
+        else
+            unfocusedReaper.stop();
+    }
+
     // Notification view component
     Component {
         id: notificationViewComponent
@@ -418,6 +457,7 @@ Item {
                     notchContainer.isShowingDefault = true;
                     notchContainer.isShowingNotifications = false;
                 }
+                viewReaper.restart();
             }
         }
 
@@ -440,6 +480,7 @@ Item {
                     notchContainer.isShowingDefault = true;
                     notchContainer.isShowingNotifications = false;
                 }
+                viewReaper.restart();
             }
         }
 
@@ -462,6 +503,7 @@ Item {
                     notchContainer.isShowingDefault = true;
                     notchContainer.isShowingNotifications = false;
                 }
+                viewReaper.restart();
             }
         }
 
@@ -484,6 +526,7 @@ Item {
                     notchContainer.isShowingDefault = true;
                     notchContainer.isShowingNotifications = false;
                 }
+                viewReaper.restart();
             }
         }
     }

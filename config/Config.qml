@@ -20,6 +20,7 @@ import "defaults/lockscreen.js" as LockscreenDefaults
 import "defaults/prefix.js" as PrefixDefaults
 import "defaults/system.js" as SystemDefaults
 import "defaults/dock.js" as DockDefaults
+import "defaults/media.js" as MediaDefaults
 import "ConfigValidator.js" as ConfigValidator
 
 Singleton {
@@ -53,9 +54,10 @@ Singleton {
     property bool prefixReady: false
     property bool systemReady: false
     property bool dockReady: false
+    property bool mediaReady: false
     property bool keybindsInitialLoadComplete: false
 
-    property bool initialLoadComplete: themeReady && frameReady && workspacesReady && overviewReady && notchReady && compositorReady && performanceReady && weatherReady && desktopReady && lockscreenReady && prefixReady && systemReady && dockReady
+    property bool initialLoadComplete: themeReady && frameReady && workspacesReady && overviewReady && notchReady && compositorReady && performanceReady && weatherReady && desktopReady && lockscreenReady && prefixReady && systemReady && dockReady && mediaReady
 
     // Compatibility aliases
     property alias loader: themeLoader
@@ -82,6 +84,7 @@ Singleton {
             "cp -n '" + root.presetDir + "/lockscreen.json' '" + root.configDir + "/lockscreen.json' 2>/dev/null || true; " +
             "cp -n '" + root.presetDir + "/dock.json' '" + root.configDir + "/dock.json' 2>/dev/null || true; " +
             "cp -n '" + root.presetDir + "/system.json' '" + root.configDir + "/system.json' 2>/dev/null || true; " +
+            "cp -n '" + root.presetDir + "/media.json' '" + root.configDir + "/media.json' 2>/dev/null || true; " +
             "echo 'Preset files copied if missing'"
         ]
     }
@@ -121,11 +124,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.themeReady && !root.pauseAutoSave) {
-                themeLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("theme", themeLoader)
 
         adapter: JsonAdapter {
             property bool oledMode: false
@@ -516,11 +515,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.frameReady && !root.pauseAutoSave) {
-                frameLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("frame", frameLoader)
 
         adapter: JsonAdapter {
             property bool enabled: false
@@ -556,11 +551,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.workspacesReady && !root.pauseAutoSave) {
-                workspacesLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("workspaces", workspacesLoader)
 
         adapter: JsonAdapter {
             property int shown: 9
@@ -599,11 +590,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.overviewReady && !root.pauseAutoSave) {
-                overviewLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("overview", overviewLoader)
 
         adapter: JsonAdapter {
             property bool enabled: true
@@ -643,11 +630,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.notchReady && !root.pauseAutoSave) {
-                notchLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("notch", notchLoader)
 
         adapter: JsonAdapter {
             property string theme: "default"
@@ -694,11 +677,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.compositorReady && !root.pauseAutoSave) {
-                compositorLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("compositor", compositorLoader)
 
         adapter: JsonAdapter {
             property var activeBorderColor: ["primary"]
@@ -747,6 +726,45 @@ Singleton {
     }
 
     // ============================================
+    // MEDIA MODULE
+    // ============================================
+    FileView {
+        id: mediaLoader
+        path: root.configDir + "/media.json"
+        atomicWrites: true
+        watchChanges: true
+        onLoaded: {
+            if (!root.mediaReady) {
+                validateModule("media", mediaLoader, MediaDefaults.data, () => {
+                    root.mediaReady = true;
+                });
+            }
+        }
+        onLoadFailed: {
+            if (error.toString().includes("FileNotFound") && !root.mediaReady) {
+                handleMissingConfig("media", mediaLoader, MediaDefaults.data, () => {
+                    root.mediaReady = true;
+                });
+            }
+        }
+        onFileChanged: {
+            root.pauseAutoSave = true;
+            reload();
+            root.pauseAutoSave = false;
+        }
+        onPathChanged: reload()
+        onAdapterUpdated: root.queueWrite("media", mediaLoader)
+
+        adapter: JsonAdapter {
+            // Publishes artwork, but registers a player per tab.
+            property bool enableFirefoxPlayer: false
+            property bool coverArtEmbedded: true
+            property bool coverArtOnline: false
+            property string coverArtFallback: "appIcon"  // appIcon | wallpaper | none
+        }
+    }
+
+    // ============================================
     // PERFORMANCE MODULE
     // ============================================
     FileView {
@@ -774,11 +792,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.performanceReady && !root.pauseAutoSave) {
-                performanceLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("performance", performanceLoader)
 
         adapter: JsonAdapter {
             property bool blurTransition: true
@@ -818,11 +832,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.weatherReady && !root.pauseAutoSave) {
-                weatherLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("weather", weatherLoader)
 
         adapter: JsonAdapter {
             property string location: ""
@@ -858,11 +868,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.desktopReady && !root.pauseAutoSave) {
-                desktopLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("desktop", desktopLoader)
 
         adapter: JsonAdapter {
             property bool enabled: false
@@ -900,11 +906,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.lockscreenReady && !root.pauseAutoSave) {
-                lockscreenLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("lockscreen", lockscreenLoader)
 
         adapter: JsonAdapter {
             property string position: "bottom"
@@ -939,11 +941,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.prefixReady && !root.pauseAutoSave) {
-                prefixLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("prefix", prefixLoader)
 
         adapter: JsonAdapter {
             property string clipboard: "cc"
@@ -982,11 +980,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.systemReady && !root.pauseAutoSave) {
-                systemLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("system", systemLoader)
 
         adapter: JsonAdapter {
             property list<string> disks: ["/"]
@@ -1064,11 +1058,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.dockReady && !root.pauseAutoSave) {
-                dockLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("dock", dockLoader)
 
         adapter: JsonAdapter {
             property bool enabled: false
@@ -1115,11 +1105,7 @@ Singleton {
             root.pauseAutoSave = false;
         }
         onPathChanged: reload()
-        onAdapterUpdated: {
-            if (root.pinnedAppsReady && !root.pauseAutoSave) {
-                pinnedAppsLoader.writeAdapter();
-            }
-        }
+        onAdapterUpdated: root.queueWrite("pinnedApps", pinnedAppsLoader)
 
         adapter: JsonAdapter {
             property list<string> apps: ["kitty"]
@@ -1331,7 +1317,7 @@ Singleton {
         }
         onAdapterUpdated: {
             if (root.keybindsInitialLoadComplete) {
-                keybindsLoader.writeAdapter();
+                root.queueWrite("keybinds", keybindsLoader, true);
             }
         }
 
@@ -3244,6 +3230,30 @@ Singleton {
         }
     }
 
+    // Adapters emit one update per property; coalesce into one write per module.
+    property var pendingWrites: ({})
+
+    function queueWrite(name, loader, force) {
+        if (!force && (!root[name + "Ready"] || root.pauseAutoSave))
+            return;
+        root.pendingWrites[name] = loader;
+        writeDebounce.restart();
+    }
+
+    function flushWrites() {
+        for (const name in root.pendingWrites) {
+            root.pendingWrites[name].writeAdapter();
+        }
+        root.pendingWrites = ({});
+    }
+
+    Timer {
+        id: writeDebounce
+        interval: 250
+        repeat: false
+        onTriggered: root.flushWrites()
+    }
+
     // Validation helper
     function validateModule(name, loader, defaults, onComplete) {
         var raw = loader.text();
@@ -3392,6 +3402,9 @@ Singleton {
     // Dock configuration
     property QtObject dock: dockLoader.adapter
 
+    // Media configuration
+    property QtObject media: mediaLoader.adapter
+
     // Pinned apps configuration (stored in dataPath)
     property QtObject pinnedApps: pinnedAppsLoader.adapter
 
@@ -3433,6 +3446,9 @@ Singleton {
     }
     function saveDock() {
         dockLoader.writeAdapter();
+    }
+    function saveMedia() {
+        mediaLoader.writeAdapter();
     }
     function savePinnedApps() {
         pinnedAppsLoader.writeAdapter();

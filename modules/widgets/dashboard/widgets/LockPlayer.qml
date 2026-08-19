@@ -15,7 +15,7 @@ StyledRect {
     property bool isPlaying: MprisController.activePlayer?.playbackState === MprisPlaybackState.Playing
     property real position: MprisController.activePlayer?.position ?? 0.0
     property real length: MprisController.activePlayer?.length ?? 1.0
-    property bool hasArtwork: (MprisController.activePlayer?.trackArtUrl ?? "") !== ""
+    property bool hasArtwork: CoverArtService.hasArt
     property string wallpaperPath: {
         if (!GlobalStates.wallpaperManager) return "";
         let path = GlobalStates.wallpaperManager.currentWallpaper;
@@ -47,7 +47,7 @@ StyledRect {
             id: lockPlayerBgArt
             sourceSize: Qt.size(64, 64)
             anchors.fill: parent
-            source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : lockPlayer.wallpaperPath
+            source: CoverArtService.hasArt ? CoverArtService.source : lockPlayer.wallpaperPath
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             visible: false
@@ -168,8 +168,8 @@ StyledRect {
                     id: albumArt
                     sourceSize: Qt.size(128, 128)
                     anchors.fill: parent
-                    source: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? MprisController.activePlayer.trackArtUrl : lockPlayer.wallpaperPath
-                    fillMode: Image.PreserveAspectCrop
+                    source: CoverArtService.source !== "" ? CoverArtService.source : lockPlayer.wallpaperPath
+                    fillMode: CoverArtService.usingFallback ? Image.PreserveAspectFit : Image.PreserveAspectCrop
                     asynchronous: true
                     visible: false
                 }

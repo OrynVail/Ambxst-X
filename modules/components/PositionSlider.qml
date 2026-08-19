@@ -21,8 +21,6 @@ Item {
     property bool isPlaying: player?.playbackState === MprisPlaybackState.Playing
     property real position: player?.position ?? 0.0
     property real length: player?.length ?? 1.0
-    property bool hasArtwork: (player?.trackArtUrl ?? "") !== ""
-    // property var playerColors: hasArtwork ? PlayerColors.getColorsForPlayer(player) : null
 
     property alias value: slider.value
     property alias isDragging: slider.isDragging

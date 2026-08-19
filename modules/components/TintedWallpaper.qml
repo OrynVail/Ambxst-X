@@ -76,6 +76,7 @@ Item {
             id: rawImage
             anchors.fill: parent
             source: root.source
+            sourceSize: Qt.size(width, height)
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             smooth: true

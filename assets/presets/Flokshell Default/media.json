@@ -1,0 +1,6 @@
+{
+  "enableFirefoxPlayer": false,
+  "coverArtEmbedded": true,
+  "coverArtOnline": false,
+  "coverArtFallback": "appIcon"
+}
