@@ -1,7 +1,7 @@
 .pragma library
 
 var data = {
-    "oledMode": false,
+    "oledMode": true,
     "lightMode": false,
     "roundness": 16,
     "font": "Roboto Condensed",
