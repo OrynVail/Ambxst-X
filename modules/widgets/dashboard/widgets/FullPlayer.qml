@@ -28,6 +28,7 @@ StyledRect {
     property real position: MprisController.activePlayer?.position ?? 0.0
     property real length: MprisController.activePlayer?.length ?? 1.0
     property bool hasArtwork: CoverArtService.hasArt
+    readonly property bool hasVisual: CoverArtService.source !== ""
     property bool hasActivePlayer: MprisController.activePlayer !== null
     property bool isSeeking: false
 
@@ -105,7 +106,7 @@ StyledRect {
         mipmap: true
         id: backgroundArtBlurred
         anchors.fill: parent
-        source: player.hasArtwork ? CoverArtService.source : ""
+        source: CoverArtService.source
         sourceSize: Qt.size(64, 64)
         fillMode: Image.PreserveAspectCrop
         visible: false
@@ -119,8 +120,8 @@ StyledRect {
         blurEnabled: true
         blurMax: 32
         blur: 1.0
-        opacity: player.hasArtwork ? 0.25 : 0.0
-        visible: player.hasArtwork
+        opacity: player.hasVisual ? 0.25 : 0.0
+        visible: player.hasVisual
         Behavior on opacity {
             enabled: Config.animDuration > 0
             NumberAnimation {
@@ -134,7 +135,7 @@ StyledRect {
         mipmap: true
         id: backgroundArtFull
         anchors.fill: parent
-        source: player.hasArtwork ? CoverArtService.source : ""
+        source: CoverArtService.source
         sourceSize: Qt.size(512, 512)
         fillMode: Image.PreserveAspectCrop
         visible: false
@@ -150,8 +151,8 @@ StyledRect {
         maskInverted: true
         maskThresholdMin: 0.5
         maskSpreadAtMin: 1.0
-        opacity: player.hasArtwork ? 1.0 : 0.0
-        visible: player.hasArtwork
+        opacity: player.hasVisual ? 1.0 : 0.0
+        visible: player.hasVisual
         Behavior on opacity {
             enabled: Config.animDuration > 0
             NumberAnimation {

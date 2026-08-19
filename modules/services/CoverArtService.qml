@@ -21,11 +21,16 @@ Singleton {
 
     readonly property bool hasArt: root.artPath !== ""
 
+    // Browsers publish no desktopEntry, so fall through to identity and the
+    // dbus name before giving up.
     readonly property string playerIcon: {
-        const entry = root.player?.desktopEntry ?? "";
-        if (entry === "")
+        const p = root.player;
+        if (!p)
             return "";
-        return Quickshell.iconPath(entry, true);
+        const name = (p.desktopEntry ?? "") !== "" ? p.desktopEntry : ((p.identity ?? "") !== "" ? p.identity : (p.dbusName ?? "").replace("org.mpris.MediaPlayer2.", "").split(".")[0]);
+        if (name === "")
+            return "";
+        return Quickshell.iconPath(AppSearch.getCachedIcon(name), true);
     }
 
     readonly property string fallbackMode: Config.media?.coverArtFallback ?? "appIcon"
