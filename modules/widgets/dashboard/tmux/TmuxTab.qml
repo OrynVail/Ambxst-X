@@ -55,6 +55,11 @@ Item {
     property var sessionPanes: []
     property bool loadingSessionInfo: false
 
+    property string controlSession: ""
+    property string pendingAttachSession: ""
+    readonly property string homeDir: Quickshell.env("HOME") || ""
+    readonly property var controlEvents: ["%sessions-changed", "%session-renamed", "%session-window-changed", "%window-add", "%window-close", "%window-renamed", "%unlinked-window-add", "%unlinked-window-close", "%unlinked-window-renamed", "%client-detached", "%client-session-changed"]
+
     onExpandedItemIndexChanged:
     // Close expanded options when selection changes to a different item is handled in onSelectedIndexChanged
     {}
@@ -159,6 +164,15 @@ Item {
         var createButtonText = "Create new session";
         var isCreateSpecific = false;
         var sessionNameToCreate = "";
+        var sessionDirToCreate = "";
+
+        var prevSelectedName = "";
+        if (selectedIndex >= 0 && selectedIndex < filteredSessions.length) {
+            var prevSel = filteredSessions[selectedIndex];
+            if (prevSel && !prevSel.isCreateButton && !prevSel.isCreateSpecificButton)
+                prevSelectedName = prevSel.name;
+        }
+        var prevContentY = resultsList.contentY;
 
         if (searchText.length === 0) {
             newFilteredSessions = tmuxSessions.slice(); // Copia del array
@@ -172,9 +186,18 @@ Item {
             });
 
             if (!exactMatch && searchText.length > 0) {
-                createButtonText = `Create session "${searchText}"`;
+                let trimmed = searchText.trim();
+                let isPath = trimmed.charAt(0) === '/' || trimmed.indexOf('~/') === 0;
                 isCreateSpecific = true;
-                sessionNameToCreate = searchText;
+                if (isPath) {
+                    sessionDirToCreate = trimmed.indexOf('~/') === 0 ? root.homeDir + trimmed.substring(1) : trimmed;
+                    let base = sessionDirToCreate.replace(/\/+$/, "").split('/').pop();
+                    sessionNameToCreate = (base || "root").replace(/[.:]/g, "_");
+                    createButtonText = `Create session "${sessionNameToCreate}" in ${trimmed}`;
+                } else {
+                    createButtonText = `Create session "${searchText}"`;
+                    sessionNameToCreate = searchText;
+                }
             }
         }
 
@@ -184,6 +207,7 @@ Item {
                 isCreateButton: !isCreateSpecific,
                 isCreateSpecificButton: isCreateSpecific,
                 sessionNameToCreate: sessionNameToCreate,
+                sessionDirToCreate: sessionDirToCreate,
                 icon: "terminal"
             });
         }
@@ -228,6 +252,15 @@ Item {
             }
             if (pendingRenamedSession !== "") {
                 pendingRenamedSession = "";
+            }
+        } else if (searchText.length === 0 && prevSelectedName !== "" && !deleteMode && !renameMode) {
+            for (let k = 0; k < newFilteredSessions.length; k++) {
+                if (newFilteredSessions[k].name === prevSelectedName) {
+                    selectedIndex = k;
+                    resultsList.currentIndex = k;
+                    resultsList.contentY = prevContentY;
+                    break;
+                }
             }
         }
     }
@@ -292,6 +325,25 @@ Item {
         }
     }
 
+    function ensureControlMode() {
+        if (controlProcess.running || tmuxSessions.length === 0)
+            return;
+        root.controlSession = tmuxSessions[0].name;
+        controlProcess.command = ["tmux", "-C", "attach-session", "-f", "no-output", "-t", root.controlSession];
+        controlProcess.running = true;
+    }
+
+    function handleControlEvent(line) {
+        if (!line || line.charAt(0) !== '%')
+            return;
+        for (let i = 0; i < root.controlEvents.length; i++) {
+            if (line.indexOf(root.controlEvents[i]) === 0) {
+                controlDebounce.restart();
+                return;
+            }
+        }
+    }
+
     function refreshTmuxSessions() {
         tmuxProcess.running = true;
     }
@@ -317,20 +369,31 @@ Item {
         return text.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][0-9;]*;[^\x07]*\x07/g, '').replace(/\x1b[=>]/g, '');
     }
 
-    function createTmuxSession(sessionName) {
+    function createTmuxSession(sessionName, startDir) {
+        const dir = startDir && startDir.length > 0 ? startDir : "$HOME";
         if (sessionName) {
-            createProcess.command = ["bash", "-c", `cd "$HOME" && setsid kitty -e tmux new -s "${sessionName}" < /dev/null > /dev/null 2>&1 &`];
+            createProcess.command = ["bash", "-c", `cd "${dir}" && setsid kitty -e tmux new -s "${sessionName}" -c "$PWD" < /dev/null > /dev/null 2>&1 &`];
         } else {
-            createProcess.command = ["bash", "-c", `cd "$HOME" && setsid kitty -e tmux < /dev/null > /dev/null 2>&1 &`];
+            createProcess.command = ["bash", "-c", `cd "${dir}" && setsid kitty -e tmux < /dev/null > /dev/null 2>&1 &`];
         }
         createProcess.running = true;
-        // Cerrar el dashboard
         Visibilities.setActiveModule("");
     }
 
-    function attachToSession(sessionName) {
+    function spawnClient(sessionName) {
         attachProcess.command = ["bash", "-c", `cd "$HOME" && setsid kitty -e tmux attach-session -t "${sessionName}" < /dev/null > /dev/null 2>&1 &`];
         attachProcess.running = true;
+    }
+
+    function attachToSession(sessionName) {
+        const session = tmuxSessions.find(s => s.name === sessionName);
+        if (!session || !session.attached) {
+            root.spawnClient(sessionName);
+            return;
+        }
+        root.pendingAttachSession = sessionName;
+        focusClientProcess.command = ["bash", "-c", `p=$(tmux list-clients -t "${sessionName}" -F '#{client_pid}' 2>/dev/null | head -1); for i in 1 2 3 4 5 6; do [ -z "$p" ] && break; [ "$p" = "1" ] && break; if hyprctl -j clients | jq -e --arg pid "$p" 'any(.[]; .pid == ($pid|tonumber))' > /dev/null 2>&1; then hyprctl repl "hl.dispatch(hl.dsp.focus({ window = \\"pid:$p\\" }))" > /dev/null 2>&1 && exit 0; fi; p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); done; exit 1`];
+        focusClientProcess.running = true;
     }
 
     function switchToWindow(sessionName, windowIndex) {
@@ -374,7 +437,7 @@ Item {
 
     Process {
         id: tmuxProcess
-        command: ["tmux", "list-sessions", "-F", "#{session_name}"]
+        command: ["bash", "-c", "tmux list-clients -F 'C\t#{client_session}\t#{client_flags}' 2>/dev/null; tmux list-sessions -F 'S\t#{session_name}\t#{session_windows}\t#{session_path}\t#{session_activity}'"]
         running: false
 
         stdout: StdioCollector {
@@ -382,19 +445,33 @@ Item {
             waitForEnd: true
 
             onStreamFinished: {
+                let realClients = {};
                 let sessions = [];
                 let lines = text.trim().split('\n');
                 for (let line of lines) {
-                    if (line.trim().length > 0) {
+                    let parts = line.split('\t');
+                    if (parts[0] === 'C') {
+                        if (parts[2] && parts[2].indexOf('control-mode') === -1) {
+                            realClients[parts[1]] = (realClients[parts[1]] || 0) + 1;
+                        }
+                    } else if (parts[0] === 'S' && parts[1]) {
                         sessions.push({
-                            name: line.trim(),
+                            name: parts[1],
+                            windows: parseInt(parts[2]) || 0,
+                            path: parts[3] || "",
+                            activity: parseInt(parts[4]) || 0,
+                            attached: false,
                             isCreateButton: false,
                             icon: "terminal"
                         });
                     }
                 }
+                for (let s of sessions) {
+                    s.attached = (realClients[s.name] || 0) > 0;
+                }
                 root.tmuxSessions = sessions;
                 root.updateFilteredSessions();
+                root.ensureControlMode();
             }
         }
 
@@ -403,6 +480,45 @@ Item {
                 root.tmuxSessions = [];
                 root.updateFilteredSessions();
             }
+        }
+    }
+
+    Process {
+        id: controlProcess
+        running: false
+        stdinEnabled: true
+
+        stdout: SplitParser {
+            onRead: data => root.handleControlEvent(data)
+        }
+
+        onExited: {
+            root.controlSession = "";
+            controlRestart.restart();
+        }
+    }
+
+    Timer {
+        id: controlDebounce
+        interval: 150
+        onTriggered: root.refreshTmuxSessions()
+    }
+
+    Timer {
+        id: controlRestart
+        interval: 1000
+        onTriggered: root.refreshTmuxSessions()
+    }
+
+    Process {
+        id: focusClientProcess
+        running: false
+
+        onExited: function (exitCode) {
+            if (exitCode !== 0 && root.pendingAttachSession !== "") {
+                root.spawnClient(root.pendingAttachSession);
+            }
+            root.pendingAttachSession = "";
         }
     }
 
@@ -627,7 +743,7 @@ Item {
                             let selectedSession = root.filteredSessions[root.selectedIndex];
                             if (selectedSession) {
                                 if (selectedSession.isCreateSpecificButton) {
-                                    root.createTmuxSession(selectedSession.sessionNameToCreate);
+                                    root.createTmuxSession(selectedSession.sessionNameToCreate, selectedSession.sessionDirToCreate);
                                 } else if (selectedSession.isCreateButton) {
                                     root.createTmuxSession();
                                 } else {
@@ -907,7 +1023,7 @@ Item {
 
                                 if (!root.deleteMode && !root.renameMode && !isExpanded) {
                                     if (modelData.isCreateSpecificButton) {
-                                        root.createTmuxSession(modelData.sessionNameToCreate);
+                                        root.createTmuxSession(modelData.sessionNameToCreate, modelData.sessionDirToCreate);
                                     } else if (modelData.isCreateButton) {
                                         root.createTmuxSession();
                                     } else {
@@ -1489,6 +1605,22 @@ Item {
                                     }
                                 }
                             }
+                        }
+
+                        Text {
+                            Layout.alignment: Qt.AlignVCenter
+                            visible: text.length > 0
+                            text: {
+                                if (!modelData || modelData.isCreateButton || modelData.isCreateSpecificButton)
+                                    return "";
+                                if (isInDeleteMode || isInRenameMode || modelData.windows === undefined)
+                                    return "";
+                                return (modelData.attached ? "● " : "") + modelData.windows;
+                            }
+                            color: textColor
+                            opacity: 0.55
+                            font.family: Config.theme.font
+                            font.pixelSize: Math.max(10, Config.theme.fontSize - 2)
                         }
                     }
 
